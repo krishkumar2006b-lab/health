@@ -214,30 +214,41 @@ with tab_ml:
     ).properties(width=700, height=400, title="Risk Categories vs Probability")
     st.altair_chart(chart, use_container_width=True)
 
-    # =====================================================
-    # CLINICAL NOTES
-    # =====================================================
-    st.markdown("""
-    <h3 style="
-        font-size:22px;
-        color:white;
-        margin-top:25px;
-        margin-bottom:12px;
-    ">
-        📌 Clinical Notes
-    </h3>
+# =====================================================
+# CLINICAL NOTES
+# =====================================================
+st.markdown("""
+<h3 style="
+    font-size:22px;
+    color:white;
+    margin-top:25px;
+    margin-bottom:12px;
+">
+    📌 Clinical Notes
+</h3>
 
-    <div style="
-        background:linear-gradient(135deg,#172A3A,#203A4F);
-        padding:20px 24px;
-        border-radius:14px;
-        border-left:6px solid #5DADE2;
-        box-shadow:0 6px 18px rgba(0,0,0,0.25);
+<div style="
+    background:linear-gradient(135deg,#172A3A,#203A4F);
+    padding:20px 24px;
+    border-radius:14px;
+    border-left:6px solid #5DADE2;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+">
+    <ul style="
+        font-size:17px;
+        color:white;
+        line-height:1.9;
+        margin:0;
+        padding-left:18px;
     ">
-        <ul style="
-            font-size:17px;
-            color:white;
-            line-height:1
+        <li>⚖️ Score is based on the <b>validated FINDRISC model</b>.</li>
+        <li>📏 <b>BMI ≥ 25</b> and waist circumference <b>≥ 94 cm (men) / 80 cm (women)</b> increase risk.</li>
+        <li>🩸 <b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
+        <li>📊 Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
+    </ul>
+</div>
+""", unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
