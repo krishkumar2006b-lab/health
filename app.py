@@ -153,7 +153,7 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style)
+# TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style, Fixed 'Both')
 # ---------------------------------------------------------
 import altair as alt
 
@@ -190,29 +190,32 @@ with tab_who:
 
         st.success("✅ Live WHO data successfully retrieved!")
 
-        # Sidebar filters for clean interactivity
-        st.markdown("### 🔎 Filter Options")
+        # Filter controls
         countries = sorted(df_who["Country"].unique())
         selected_country = st.selectbox("Select a country:", countries)
         selected_sex = st.radio("Select sex:", ["Both", "Male", "Female"])
 
-        # Filter data
-        filtered = df_who[(df_who["Country"] == selected_country) & (df_who["Sex"] == selected_sex)]
+        # Handle 'Both' properly
+        if selected_sex == "Both":
+            filtered = df_who[df_who["Country"] == selected_country]
+        else:
+            filtered = df_who[(df_who["Country"] == selected_country) & (df_who["Sex"] == selected_sex)]
 
         # Line chart for prevalence trends
         st.markdown(f"### 📈 Prevalence Trends in {selected_country} ({selected_sex})")
         trend_chart = alt.Chart(filtered).mark_line(point=True).encode(
             x=alt.X('Year:O', title='Year'),
             y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
-            tooltip=['Year', 'Prevalence (%)']
+            color='Sex:N',
+            tooltip=['Year', 'Sex', 'Prevalence (%)']
         ).properties(
             width=700,
             height=400,
-            title=f"Diabetes Prevalence Trends in {selected_country} ({selected_sex})"
+            title=f"Diabetes Prevalence Trends in {selected_country}"
         )
         st.altair_chart(trend_chart, use_container_width=True)
 
-        # Comparison bar chart by sex
+        # Bar chart by sex (averages)
         st.markdown(f"### 🧍 Average Prevalence by Sex in {selected_country}")
         sex_chart = alt.Chart(df_who[df_who["Country"] == selected_country]).mark_bar().encode(
             x=alt.X('Sex:N', title='Sex'),
@@ -226,7 +229,7 @@ with tab_who:
         )
         st.altair_chart(sex_chart, use_container_width=True)
 
-        # Show clean table snapshot
+        # Data snapshot
         st.markdown("### 📊 Data Snapshot")
         st.dataframe(filtered.sort_values("Year"), use_container_width=True)
 
@@ -253,6 +256,7 @@ with tab_who:
             title="Cached Prevalence Rates"
         )
         st.altair_chart(chart, use_container_width=True)
+
 
 
 # ---------------------------------------------------------
