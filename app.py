@@ -47,8 +47,17 @@ with tab_ml:
     st.header("Patient Clinical Risk Calculator")
     st.write("Adjust the sliders and inputs below — your diabetes risk updates instantly!")
 
-    col1, col2 = st.columns(2)
-    with col1:
+   col1, col2 = st.columns(2)
+
+with col1:
+    age = st.slider("Age (Years)", 18, 90, 45)
+    glucose = st.number_input("Plasma Glucose Level (mg/dL)", 
+                              min_value=30.0, max_value=400.0, value=145.0)
+
+with col2:
+    weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
+    height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
+
   age = st.slider("Age (Years)", 18, 90, 45)
 weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
 height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
