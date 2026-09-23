@@ -181,7 +181,7 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style, Fixed 'Both')
+# TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style, Fixed 'Both', Custom Colors)
 # ---------------------------------------------------------
 import altair as alt
 
@@ -229,12 +229,15 @@ with tab_who:
         else:
             filtered = df_who[(df_who["Country"] == selected_country) & (df_who["Sex"] == selected_sex)]
 
-        # Line chart for prevalence trends
+        # Line chart for prevalence trends (custom colors)
         st.markdown(f"### 📈 Prevalence Trends in {selected_country} ({selected_sex})")
         trend_chart = alt.Chart(filtered).mark_line(point=True).encode(
             x=alt.X('Year:O', title='Year'),
             y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
-            color='Sex:N',
+            color=alt.Color('Sex:N',
+                            title="Sex",
+                            scale=alt.Scale(domain=["Male", "Female", "Both"],
+                                            range=["blue", "red", "gray"])),
             tooltip=['Year', 'Sex', 'Prevalence (%)']
         ).properties(
             width=700,
@@ -243,12 +246,15 @@ with tab_who:
         )
         st.altair_chart(trend_chart, use_container_width=True)
 
-        # Bar chart by sex (averages)
+        # Bar chart by sex (averages, same color scheme)
         st.markdown(f"### 🧍 Average Prevalence by Sex in {selected_country}")
         sex_chart = alt.Chart(df_who[df_who["Country"] == selected_country]).mark_bar().encode(
             x=alt.X('Sex:N', title='Sex'),
             y=alt.Y('Prevalence (%):Q', aggregate='mean'),
-            color='Sex:N',
+            color=alt.Color('Sex:N',
+                            title="Sex",
+                            scale=alt.Scale(domain=["Male", "Female", "Both"],
+                                            range=["blue", "red", "gray"])),
             tooltip=['Sex', 'Prevalence (%)']
         ).properties(
             width=500,
