@@ -77,8 +77,10 @@ with tab_ml:
 
 
 # ---------------------------------------------------------
-# TAB 2: AI CLINICAL CHATBOT (Response above, input bar below)
+# TAB 2: AI CLINICAL CHATBOT (Smarter Assistant)
 # ---------------------------------------------------------
+import difflib
+
 with tab_chat:
     st.header("🤖 AI Healthcare Assistant")
     st.write("Ask me about diabetes prevention, BMI, glucose, exercise, diet tips, or lifestyle changes.")
@@ -88,6 +90,7 @@ with tab_chat:
         st.session_state.messages = [
             {"role": "assistant", "content": "Hello 👋! I’m your AI Health Assistant. You can ask me about BMI, glucose, exercise, diet, or general diabetes management."}
         ]
+        st.session_state.last_topic = None  # Track context
 
     # Display chat history
     for msg in st.session_state.messages:
@@ -103,7 +106,9 @@ with tab_chat:
         with st.chat_message("user"):
             st.write(user_input)
 
-        # Keyword-based responses
+        # Smarter response logic
+        query = user_input.lower()
+
         responses = {
             "hello": "Hi there 👋! How can I help you today?",
             "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
@@ -116,18 +121,27 @@ with tab_chat:
             "exercise": "150+ minutes of moderate activity weekly improves insulin sensitivity and reduces risk.",
             "workout": "Resistance training plus aerobic exercise helps regulate glucose.",
             "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk.",
-            "reduce": "To reduce diabetes risk: maintain a healthy weight, eat balanced meals, exercise regularly, and monitor glucose levels."
+            "reduce": "To reduce diabetes risk: maintain a healthy weight, eat balanced meals, exercise regularly, and monitor glucose levels.",
+            "risk": f"Based on your last inputs, your calculated diabetes risk score was {risk_pct}%. Adjusting weight, age, or glucose will change this value.",
+            # NEW RESPONSES
+            "lower bmi": "To lower BMI: focus on gradual weight loss through portion control, balanced nutrition, and consistent physical activity. Even a 5–10% reduction in body weight can improve insulin sensitivity.",
+            "lower glucose": "To lower glucose: reduce refined carbs and sugary foods, increase fiber intake, stay hydrated, and exercise regularly. Medication may be needed if lifestyle changes aren’t enough.",
+            "lower sugar": "To lower blood sugar: monitor carbohydrate intake, avoid sugary drinks, eat smaller frequent meals, and include aerobic + resistance exercise. Consistency is key."
         }
 
-        query = user_input.lower()
-        reply = None
-        for key, val in responses.items():
-            if key in query:
-                reply = val
-                break
-
-        if reply is None:
-            reply = f"I don’t have a direct answer for '{user_input}', but I can explain general diabetes prevention strategies like exercise, diet, and glucose monitoring."
+        # Fuzzy matching
+        best_match = difflib.get_close_matches(query, responses.keys(), n=1, cutoff=0.6)
+        if best_match:
+            reply = responses[best_match[0]]
+            st.session_state.last_topic = best_match[0]
+        else:
+            # Context-aware follow-up
+            if "how much" in query and st.session_state.last_topic == "bmi":
+                reply = "A healthy BMI range is 18.5–24.9."
+            elif "how much" in query and st.session_state.last_topic == "glucose":
+                reply = "Normal fasting glucose is <100 mg/dL. Prediabetes is 100–125 mg/dL."
+            else:
+                reply = f"I don’t have a direct answer for '{user_input}', but I can explain general diabetes prevention strategies like exercise, diet, and glucose monitoring."
 
         # Show assistant reply immediately after user message
         st.session_state.messages.append({"role": "assistant", "content": reply})
