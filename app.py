@@ -77,7 +77,7 @@ with tab_ml:
 
 
 # ---------------------------------------------------------
-# TAB 2: AI CLINICAL CHATBOT (Enhanced Conversational Assistant)
+# TAB 2: AI CLINICAL CHATBOT (Response above, input bar below)
 # ---------------------------------------------------------
 with tab_chat:
     st.header("🤖 AI Healthcare Assistant")
@@ -94,15 +94,16 @@ with tab_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # Input bar at bottom
+    # Input bar LAST so it stays pinned at bottom
     user_input = st.chat_input("Type your medical query here...")
 
     if user_input:
+        # Show user message
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.write(user_input)
 
-        # Keyword-based responses with intent mapping
+        # Keyword-based responses
         responses = {
             "hello": "Hi there 👋! How can I help you today?",
             "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
@@ -128,7 +129,7 @@ with tab_chat:
         if reply is None:
             reply = f"I don’t have a direct answer for '{user_input}', but I can explain general diabetes prevention strategies like exercise, diet, and glucose monitoring."
 
-        # Show assistant reply
+        # Show assistant reply immediately after user message
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
             st.write(reply)
