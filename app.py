@@ -79,35 +79,50 @@ with tab_ml:
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT
 # ---------------------------------------------------------
+# ---------------------------------------------------------
+# TAB 2: AI CLINICAL CHATBOT (Smarter Rules)
+# ---------------------------------------------------------
 with tab_chat:
     st.header("AI Healthcare Assistant")
     st.write("Ask questions regarding diabetes prevention, glucose management, exercise guidelines, or risk factors.")
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Hello! I am your AI Health Assistant. How can I help you understand your risk metrics or diabetes management today?"}
+            {"role": "assistant", "content": "Hello! I am your AI Health Assistant. Ask me about BMI, glucose, exercise, diet, or general diabetes management."}
         ]
 
+    # Display chat history
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
+    # User input
     if user_input := st.chat_input("Type your medical query here..."):
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.write(user_input)
 
-        # Rule-based Medical Logic Responses
-        query = user_input.lower()
-        if "bmi" in query:
-            reply = "Body Mass Index (BMI) evaluates weight relative to height ($kg/m^2$). A normal range is 18.5–24.9. Higher BMIs correlate with higher insulin resistance."
-        elif "glucose" in query or "sugar" in query:
-            reply = "Fasting plasma glucose below 100 mg/dL is normal. 100–125 mg/dL indicates prediabetes, while 126 mg/dL or higher across multiple tests indicates diabetes."
-        elif "exercise" in query or "workout" in query or "diet" in query:
-            reply = "Aerobic conditioning and resistance exercises improve insulin sensitivity. Aim for 150+ minutes of moderate activity weekly alongside a balanced low-glycemic index diet."
-        else:
-            reply = f"Regarding '{user_input}': Maintaining consistent physical activity, monitoring blood glucose, and managing body composition are key factors in reducing long-term metabolic risk."
+        # Smarter keyword-based responses
+        responses = {
+            "bmi": "BMI evaluates weight relative to height (kg/m²). Normal range is 18.5–24.9. Higher BMIs increase insulin resistance risk.",
+            "glucose": "Fasting plasma glucose <100 mg/dL is normal. 100–125 mg/dL = prediabetes. ≥126 mg/dL = diabetes.",
+            "sugar": "Blood sugar levels above 126 mg/dL on multiple tests indicate diabetes.",
+            "exercise": "150+ minutes of moderate activity weekly improves insulin sensitivity and reduces risk.",
+            "workout": "Resistance training plus aerobic exercise helps regulate glucose.",
+            "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk."
+        }
 
+        query = user_input.lower()
+        reply = None
+        for key, val in responses.items():
+            if key in query:
+                reply = val
+                break
+
+        if reply is None:
+            reply = f"I don’t have a direct answer for '{user_input}', but I can explain general diabetes prevention strategies like exercise, diet, and glucose monitoring."
+
+        # Show assistant reply
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
             st.write(reply)
