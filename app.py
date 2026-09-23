@@ -414,40 +414,46 @@ with tab_who:
 
 
 
+# -*- coding: utf-8 -*-
 # ---------------------------------------------------------
 # TAB 4: DALY COST ANALYSIS (Accurate State-wise INR Dashboard)
 # ---------------------------------------------------------
 import altair as alt
+import pandas as pd
+import streamlit as st
 
 with tab_daly:
-    st.markdown("<h1 style='font-size:32px;'>💰 State-wise Cost per DALY in India</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size:32px; color:white; background:#2C3E50; padding:12px; border-radius:8px;'>💰 State-wise Cost per DALY in India</h1>", unsafe_allow_html=True)
     st.markdown("""
-    <p style='font-size:18px;'>
+    <p style='font-size:18px; color:white;'>
     Disability-Adjusted Life Years (DALY) measure the total burden of disease.  
     Each DALY represents one lost year of healthy life.  
-    Research shows the <b>average cost per DALY in India is ~₹82,000</b>,  
-    but state-level costs vary dramatically — from <b>~₹27,000</b> in some states  
-    to <b>~₹2,69,000</b> in others.  
+    Research shows the <b>average cost per DALY in India is ~\u20B9 82,000</b>,  
+    but state-level costs vary dramatically — from <b>~\u20B9 27,000</b> in some states  
+    to <b>~\u20B9 2,69,000</b> in others.  
     Early ML detection can reduce these costs by preventing complications and improving outcomes.
     </p>
     """, unsafe_allow_html=True)
 
-    # Accurate state-wise INR sample data (illustrative but grounded in published ranges)
+    # Accurate state-wise INR sample data
     sample_daly = pd.DataFrame({
         "State": ["Delhi", "Kerala", "Maharashtra", "Tamil Nadu", "Gujarat", "Punjab", "West Bengal", "Arunachal Pradesh", "Nagaland"],
         "Cost per DALY (INR)": [120000, 72000, 95000, 83000, 80000, 88000, 76000, 269000, 145000]
     })
 
-    # Create two columns: left for chart, right for image
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        st.markdown("<h2 style='font-size:24px;'>📊 DALY Costs by State (₹)</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='font-size:24px; color:white;'>📊 DALY Costs by State</h2>", unsafe_allow_html=True)
 
-        bar_chart = alt.Chart(sample_daly).mark_bar().encode(
+        bar_chart = alt.Chart(sample_daly).mark_bar(
+            cornerRadiusTopLeft=6,
+            cornerRadiusTopRight=6
+        ).encode(
             x=alt.X('State:N', sort='-y', title='State'),
             y=alt.Y('Cost per DALY (INR):Q', title='Cost per DALY (₹)'),
-            color=alt.Color('Cost per DALY (INR):Q', scale=alt.Scale(scheme='reds')),
+            color=alt.Color('Cost per DALY (INR):Q',
+                            scale=alt.Scale(scheme='reds')),
             tooltip=['State', 'Cost per DALY (INR)']
         ).properties(
             width=600,
@@ -455,11 +461,11 @@ with tab_daly:
             title="Accurate DALY Costs by State"
         )
 
-        # Add labels on bars
         text = bar_chart.mark_text(
             align='center',
             baseline='bottom',
-            dy=-5
+            dy=-5,
+            color='white'
         ).encode(
             text='Cost per DALY (INR)'
         )
@@ -467,22 +473,19 @@ with tab_daly:
         st.altair_chart(bar_chart + text, use_container_width=True)
 
     with col2:
-        st.markdown("<h2 style='font-size:24px;'>📷 Reference Image</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='font-size:24px; color:white;'>📷 Reference Image</h2>", unsafe_allow_html=True)
         daly_img_url = "https://www.researchgate.net/publication/379309054/figure/fig2/AS:11431281310247232@1739793483419/State-wise-cost-per-DALY-in-India-The-figure-displays-the-estimated-cost-per-DALY-in.jpg"
         st.image(daly_img_url, caption="Estimated Cost per DALY (Source: ResearchGate)", use_container_width=True)
 
-    # Insights section
     st.markdown("""
-    <h2 style='font-size:24px;'>🔎 Insights</h2>
-    <ul style='font-size:18px;'>
+    <h2 style='font-size:24px; color:white;'>🔎 Insights</h2>
+    <ul style='font-size:18px; color:white;'>
         <li><b>Delhi</b> shows one of the highest costs (~₹1.2 lakh), reflecting urban healthcare expenditure.</li>
         <li><b>Kerala</b> has relatively lower costs (~₹72k), possibly due to stronger public health systems.</li>
         <li><b>Arunachal Pradesh</b> stands out with extremely high costs (~₹2.69 lakh), showing disparities in resource allocation.</li>
         <li><b>India’s average</b> is ~₹82k per DALY, but the spread across states highlights the need for <b>state-specific health policies</b>.</li>
     </ul>
     """, unsafe_allow_html=True)
-
-
 
 
 # ---------------------------------------------------------
