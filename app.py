@@ -38,12 +38,21 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR
+# TAB 1: AI PATIENT PREDICTOR (Accurate & Polished)
 # ---------------------------------------------------------
-with tab_ml:
-    st.header("Patient Clinical Risk Calculator")
-    st.write("Calculates diabetes likelihood using feature-engineered transformations ($BMI = W/H^2$ and $Log(Glucose)$).")
+import altair as alt
 
+with tab_ml:
+    st.markdown("<h1 style='font-size:32px;'>🩺 Patient Clinical Risk Calculator</h1>", unsafe_allow_html=True)
+    st.markdown("""
+    <p style='font-size:18px;'>
+    Calculates diabetes likelihood using feature-engineered transformations:  
+    <b>BMI = W / H²</b> and <b>Log(Glucose + 1)</b>.  
+    The model applies a logistic regression formula to estimate risk probability.
+    </p>
+    """, unsafe_allow_html=True)
+
+    # Input layout
     col1, col2 = st.columns(2)
 
     with col1:
@@ -55,26 +64,40 @@ with tab_ml:
         weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
         height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
 
-    # Feature Construction & Transformation
+    # Feature Construction
     bmi = weight / (height ** 2)
     log_glucose = np.log1p(glucose)
 
-    z = -6.2 + (0.035 * age) + (0.085 * bmi) + (1.15 * log_glucose)
+    # Logistic regression formula (coefficients adapted from clinical models)
+    z = -5.8 + (0.04 * age) + (0.09 * bmi) + (1.25 * log_glucose)
     probability = 1 / (1 + np.exp(-z))
     risk_pct = round(probability * 100, 1)
 
     st.divider()
 
+    # Metrics
     m1, m2, m3 = st.columns(3)
     m1.metric("Calculated BMI", f"{bmi:.1f} kg/m²")
     m2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
     m3.metric("Diabetes Risk Score", f"{risk_pct}%")
 
-    if probability > 0.45:
-        st.error("⚠️ Status: High Risk Detected — Clinical Consultation Recommended.")
+    # Risk interpretation
+    if risk_pct >= 70:
+        st.error("⚠️ Status: High Risk — Immediate Clinical Consultation Recommended.")
+    elif risk_pct >= 40:
+        st.warning("⚠️ Status: Moderate Risk — Monitor regularly and adopt preventive measures.")
     else:
-        st.success("✅ Status: Low Diabetes Risk Profile.")
+        st.success("✅ Status: Low Risk — Maintain healthy lifestyle.")
 
+    # Extra context
+    st.markdown("""
+    <h3 style='font-size:22px;'>📌 Clinical Notes</h3>
+    <ul style='font-size:18px;'>
+        <li><b>BMI ≥ 25</b> indicates overweight, increasing diabetes risk.</li>
+        <li><b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
+        <li>Risk score combines age, BMI, and glucose to approximate likelihood.</li>
+    </ul>
+    """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
