@@ -222,6 +222,7 @@ with tab_ml:
 # TAB 2: AI CLINICAL CHATBOT 
 # ---------------------------------------------------------
 import difflib
+import streamlit as st
 
 with tab_chat:
     st.header("🤖 AI Healthcare Assistant")
@@ -240,9 +241,7 @@ with tab_chat:
             st.write(msg["content"])
 
     # Input bar pinned at bottom
-    input_container = st.container()
-    with input_container:
-        user_input = st.chat_input("Type your medical query here...")
+    user_input = st.chat_input("Type your medical query here...")
 
     if user_input:
         # Show user message
@@ -266,7 +265,7 @@ with tab_chat:
             "workout": "Resistance training plus aerobic exercise helps regulate glucose.",
             "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk.",
             "reduce": "To reduce diabetes risk: maintain a healthy weight, eat balanced meals, exercise regularly, and monitor glucose levels.",
-            "risk": f"Based on your last inputs, your calculated diabetes risk score was {risk_pct}%. Adjusting weight, age, or glucose will change this value.",
+            "risk": "Your risk score can be calculated in the predictor tab. Adjusting weight, age, or glucose will change this value.",
             "lower bmi": "To lower BMI: focus on gradual weight loss through portion control, balanced nutrition, and consistent physical activity. Even a 5–10% reduction in body weight can improve insulin sensitivity.",
             "lower glucose": "To lower glucose: reduce refined carbs and sugary foods, increase fiber intake, stay hydrated, and exercise regularly. Medication may be needed if lifestyle changes aren’t enough.",
             "lower sugar": "To lower blood sugar: monitor carbohydrate intake, avoid sugary drinks, eat smaller frequent meals, and include aerobic + resistance exercise. Consistency is key."
@@ -291,8 +290,7 @@ with tab_chat:
         with st.chat_message("assistant"):
             st.write(reply)
 
-        # Auto-scroll to bottom so input stays visible
-        st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style, Fixed 'Both', Custom Colors)
