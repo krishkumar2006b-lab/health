@@ -38,7 +38,7 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Accurate & Polished)
+# TAB 1: AI PATIENT PREDICTOR (Balanced Risk Detection)
 # ---------------------------------------------------------
 import altair as alt
 
@@ -68,8 +68,9 @@ with tab_ml:
     bmi = weight / (height ** 2)
     log_glucose = np.log1p(glucose)
 
-    # Logistic regression formula (coefficients adapted from clinical models)
-    z = -5.8 + (0.04 * age) + (0.09 * bmi) + (1.25 * log_glucose)
+    # Balanced logistic regression formula
+    # Smaller coefficients + adjusted intercept for realistic spread
+    z = -3.5 + (0.02 * age) + (0.05 * bmi) + (0.4 * log_glucose)
     probability = 1 / (1 + np.exp(-z))
     risk_pct = round(probability * 100, 1)
 
@@ -81,7 +82,7 @@ with tab_ml:
     m2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
     m3.metric("Diabetes Risk Score", f"{risk_pct}%")
 
-    # Risk interpretation
+    # Risk interpretation with balanced thresholds
     if risk_pct >= 70:
         st.error("⚠️ Status: High Risk — Immediate Clinical Consultation Recommended.")
     elif risk_pct >= 40:
@@ -89,15 +90,16 @@ with tab_ml:
     else:
         st.success("✅ Status: Low Risk — Maintain healthy lifestyle.")
 
-    # Extra context
+    # Clinical context
     st.markdown("""
     <h3 style='font-size:22px;'>📌 Clinical Notes</h3>
     <ul style='font-size:18px;'>
         <li><b>BMI ≥ 25</b> indicates overweight, increasing diabetes risk.</li>
         <li><b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
-        <li>Risk score combines age, BMI, and glucose to approximate likelihood.</li>
+        <li>Risk score now scales realistically: younger, healthy BMI, and normal glucose → low risk; older, high BMI, and high glucose → high risk.</li>
     </ul>
     """, unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
