@@ -37,7 +37,6 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
     "🧠 ML Feature Importance"
 ])
 
-
 # ---------------------------------------------------------
 # TAB 1: AI PATIENT PREDICTOR (Appealing Dashboard Style)
 # ---------------------------------------------------------
@@ -139,6 +138,7 @@ with tab_ml:
         <li>Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
     </ul>
     """, unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
