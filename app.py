@@ -49,20 +49,19 @@ with tab_ml:
 
     col1, col2 = st.columns(2)
     with col1:
-        age = st.slider("Age (Years)", 18, 90, 45)
-        glucose = st.number_input("Plasma Glucose Level (mg/dL)", min_value=30.0, max_value=400.0, value=145.0)
-    with col2:
-        weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
-        height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
+  age = st.slider("Age (Years)", 18, 90, 45)
+weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
+height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
+glucose = st.number_input("Plasma Glucose Level (mg/dL)", min_value=30.0, max_value=400.0, value=145.0)
 
-    # Feature Construction
-    bmi = weight / (height ** 2)
-    log_glucose = np.log1p(glucose)
-    z = -6.2 + (0.035 * age) + (0.085 * bmi) + (1.15 * log_glucose)
-    probability = 1 / (1 + np.exp(-z))
-    risk_pct = round(probability * 100, 1)
+bmi = weight / (height ** 2)
+log_glucose = np.log1p(glucose)
+z = -6.2 + (0.035 * age) + (0.085 * bmi) + (1.15 * log_glucose)
+probability = 1 / (1 + np.exp(-z))
+risk_pct = round(probability * 100, 1)
 
-    st.divider()
+st.metric("Diabetes Risk Score", f"{risk_pct}%")
+
 
     # Dynamic Metrics
     m1, m2, m3 = st.columns(3)
