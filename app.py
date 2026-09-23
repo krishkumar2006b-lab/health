@@ -215,7 +215,7 @@ with tab_ml:
     st.altair_chart(chart, use_container_width=True)
 
     # Clinical Notes
-    st.markdown("""
+    st.markdown(""")
     <h3 style="font-size:22px; color:white; margin-top:20px;">📌 Clinical Notes</h3>
     <div style="
         background:linear-gradient(135deg,#172A3A,#203A4F);
