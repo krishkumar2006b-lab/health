@@ -260,7 +260,7 @@ with tab_who:
 
 
 # ---------------------------------------------------------
-# TAB 4: DALY COST ANALYSIS (Professional Dashboard Style, INR)
+# TAB 4: DALY COST ANALYSIS (Clean INR Dashboard)
 # ---------------------------------------------------------
 import altair as alt
 
@@ -284,7 +284,7 @@ with tab_daly:
         "Cost per DALY (INR)": [95000, 72000, 83000, 120000, 80000, 88000, 76000]
     })
 
-    # Interactive bar chart
+    # Interactive bar chart (clean look)
     bar_chart = alt.Chart(sample_daly).mark_bar().encode(
         x=alt.X('State:N', sort='-y', title='State'),
         y=alt.Y('Cost per DALY (INR):Q', title='Cost per DALY (₹)'),
@@ -296,21 +296,16 @@ with tab_daly:
         title="Illustrative DALY Costs by State (₹)"
     )
 
-    st.altair_chart(bar_chart, use_container_width=True)
-
-    # Heatmap-style visualization for quick comparison
-    st.markdown("### 🌡️ Heatmap View")
-    heatmap = alt.Chart(sample_daly).mark_rect().encode(
-        x=alt.X('State:N', title='State'),
-        y=alt.Y('State:N', title='State'),
-        color=alt.Color('Cost per DALY (INR):Q', scale=alt.Scale(scheme='reds')),
-        tooltip=['State', 'Cost per DALY (INR)']
-    ).properties(
-        width=600,
-        height=300,
-        title="Relative DALY Cost Intensity"
+    # Add labels on bars for clarity
+    text = bar_chart.mark_text(
+        align='center',
+        baseline='bottom',
+        dy=-5
+    ).encode(
+        text='Cost per DALY (INR)'
     )
-    st.altair_chart(heatmap, use_container_width=True)
+
+    st.altair_chart(bar_chart + text, use_container_width=True)
 
     # Insights section
     st.markdown("""
@@ -320,6 +315,7 @@ with tab_daly:
     - **Maharashtra and Tamil Nadu** fall in the mid‑range, highlighting regional disparities.  
     - These differences emphasize the importance of **state‑specific health policies** to reduce DALY costs.  
     """)
+
 
 
 # ---------------------------------------------------------
