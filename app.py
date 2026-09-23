@@ -40,62 +40,41 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 # ---------------------------------------------------------
 # TAB 1: AI PATIENT PREDICTOR
 # ---------------------------------------------------------
-# ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Enhanced Interactivity)
-# ---------------------------------------------------------
 with tab_ml:
     st.header("Patient Clinical Risk Calculator")
-    st.write("Adjust the sliders and inputs below — your diabetes risk updates instantly!")
+    st.write("Calculates diabetes likelihood using feature-engineered transformations ($BMI = W/H^2$ and $Log(Glucose)$).")
 
-   col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-with col1:
-    age = st.slider("Age (Years)", 18, 90, 45)
-    glucose = st.number_input("Plasma Glucose Level (mg/dL)", 
-                              min_value=30.0, max_value=400.0, value=145.0)
+    with col1:
+        age = st.slider("Age (Years)", 18, 90, 45)
+        glucose = st.number_input("Plasma Glucose Level (mg/dL)", 
+                                  min_value=30.0, max_value=400.0, value=145.0)
 
-with col2:
-    weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
-    height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
+    with col2:
+        weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
+        height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
 
-  age = st.slider("Age (Years)", 18, 90, 45)
-weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
-height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
-glucose = st.number_input("Plasma Glucose Level (mg/dL)", min_value=30.0, max_value=400.0, value=145.0)
+    # Feature Construction & Transformation
+    bmi = weight / (height ** 2)
+    log_glucose = np.log1p(glucose)
 
-bmi = weight / (height ** 2)
-log_glucose = np.log1p(glucose)
-z = -6.2 + (0.035 * age) + (0.085 * bmi) + (1.15 * log_glucose)
-probability = 1 / (1 + np.exp(-z))
-risk_pct = round(probability * 100, 1)
+    z = -6.2 + (0.035 * age) + (0.085 * bmi) + (1.15 * log_glucose)
+    probability = 1 / (1 + np.exp(-z))
+    risk_pct = round(probability * 100, 1)
 
-st.metric("Diabetes Risk Score", f"{risk_pct}%")
+    st.divider()
 
-
-    # Dynamic Metrics
     m1, m2, m3 = st.columns(3)
     m1.metric("Calculated BMI", f"{bmi:.1f} kg/m²")
     m2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
     m3.metric("Diabetes Risk Score", f"{risk_pct}%")
 
-    # Interactive Progress Bar
-    st.progress(probability)
-
-    # Animated Feedback
     if probability > 0.45:
-        st.error(f"⚠️ High Risk Detected ({risk_pct}%) — Clinical Consultation Recommended.")
-    elif probability > 0.25:
-        st.warning(f"🟡 Moderate Risk ({risk_pct}%) — Lifestyle adjustments advised.")
+        st.error("⚠️ Status: High Risk Detected — Clinical Consultation Recommended.")
     else:
-        st.success(f"✅ Low Risk ({risk_pct}%) — Keep up healthy habits!")
+        st.success("✅ Status: Low Diabetes Risk Profile.")
 
-    # Optional: Real-time chart
-    st.markdown("### Risk Sensitivity")
-    st.line_chart(pd.DataFrame({
-        "Age": [age],
-        "BMI": [bmi],
-        "Risk (%)": [risk_pct]
-    }))
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT
