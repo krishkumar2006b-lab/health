@@ -153,13 +153,13 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Backend API, Enhanced with Clean Labels)
+# TAB 3: LIVE WHO GLOBAL DATA (Clean & Interactive)
 # ---------------------------------------------------------
 import altair as alt
 
 with tab_who:
     st.header("🌐 WHO Global Diabetes Data Explorer")
-    st.write("Pulling live prevalence statistics from the WHO Global Health Observatory API.")
+    st.write("Interactive prevalence statistics from the WHO Global Health Observatory API.")
 
     @st.cache_data(ttl=3600)
     def fetch_who_data():
@@ -169,7 +169,7 @@ with tab_who:
             if res.status_code == 200:
                 data = res.json().get('value', [])
                 records = []
-                for item in data[:50]:  # fetch more records for richer visualization
+                for item in data[:200]:  # fetch more records for richer visualization
                     records.append({
                         "Country": item.get('SpatialDim', 'N/A'),
                         "Year": int(item.get('TimeDim', 0)),
@@ -185,36 +185,35 @@ with tab_who:
 
     if df_who is not None and not df_who.empty:
         # Map WHO codes to readable labels
-        sex_map = {
-            "SEX_FMLE": "Female",
-            "SEX_MLE": "Male",
-            "Both": "Both"
-        }
+        sex_map = {"SEX_FMLE": "Female", "SEX_MLE": "Male", "Both": "Both"}
         df_who["Sex"] = df_who["Sex"].map(sex_map).fillna(df_who["Sex"])
 
         st.success("✅ Live WHO data successfully retrieved!")
 
-        # Show raw data
-        st.markdown("### 📊 Raw Data Snapshot")
-        st.dataframe(df_who.head(20), use_container_width=True)
+        # Country selector
+        countries = sorted(df_who["Country"].unique())
+        selected_country = st.selectbox("Select a country to view trends:", countries)
 
-        # Interactive chart: prevalence by country/year
-        st.markdown("### 📈 Prevalence Trends by Country")
-        chart = alt.Chart(df_who).mark_line(point=True).encode(
+        # Filter by selected country
+        country_data = df_who[df_who["Country"] == selected_country]
+
+        # Line chart for prevalence trends
+        st.markdown(f"### 📈 Prevalence Trends in {selected_country}")
+        trend_chart = alt.Chart(country_data).mark_line(point=True).encode(
             x=alt.X('Year:O', title='Year'),
             y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
-            color='Country:N',
-            tooltip=['Country', 'Year', 'Prevalence (%)', 'Sex']
+            color='Sex:N',
+            tooltip=['Year', 'Sex', 'Prevalence (%)']
         ).properties(
             width=700,
             height=400,
-            title="Diabetes Prevalence Trends"
+            title=f"Diabetes Prevalence Trends in {selected_country}"
         )
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(trend_chart, use_container_width=True)
 
-        # Bar chart by sex with clean labels
-        st.markdown("### 🧍 Prevalence by Sex")
-        sex_chart = alt.Chart(df_who).mark_bar().encode(
+        # Bar chart by sex (averages)
+        st.markdown("### 🧍 Average Prevalence by Sex")
+        sex_chart = alt.Chart(country_data).mark_bar().encode(
             x=alt.X('Sex:N', title='Sex'),
             y=alt.Y('Prevalence (%):Q', aggregate='mean'),
             color='Sex:N',
@@ -222,7 +221,7 @@ with tab_who:
         ).properties(
             width=400,
             height=300,
-            title="Average Prevalence by Sex"
+            title=f"Average Prevalence by Sex in {selected_country}"
         )
         st.altair_chart(sex_chart, use_container_width=True)
 
@@ -238,7 +237,6 @@ with tab_who:
         st.markdown("### 📊 Cached Reference Data")
         st.dataframe(sample_who, use_container_width=True)
 
-        # Visualize cached data
         chart = alt.Chart(sample_who).mark_bar().encode(
             x='Country',
             y='Glucose Prevalence Rate (%)',
