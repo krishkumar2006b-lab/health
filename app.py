@@ -37,24 +37,38 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
     "🧠 ML Feature Importance"
 ])
 
+
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Validated FINDRISC Model)
+# TAB 1: AI PATIENT PREDICTOR (Appealing Dashboard Style)
 # ---------------------------------------------------------
 with tab_ml:
-    st.markdown("<h1 style='font-size:32px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
-    st.write("Validated Finnish Diabetes Risk Score (FINDRISC) adapted for demonstration.")
+    st.markdown("<h1 style='font-size:34px; color:#2C3E50;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+    st.markdown("""
+    <p style='font-size:18px; color:#34495E;'>
+    This calculator uses the <b>validated Finnish Diabetes Risk Score (FINDRISC)</b> model.  
+    It estimates your 10‑year risk of developing type 2 diabetes based on lifestyle and clinical factors.
+    </p>
+    """, unsafe_allow_html=True)
 
-    # Inputs
-    age = st.slider("Age (Years)", 18, 90, 45)
-    bmi = st.number_input("BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
-    waist = st.number_input("Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
-    activity = st.radio("Daily Physical Activity ≥30 min?", ["Yes", "No"])
-    diet = st.radio("Daily Fruit/Vegetable Intake?", ["Yes", "No"])
-    meds = st.radio("On Antihypertensive Medication?", ["Yes", "No"])
-    high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
-    family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
+    st.divider()
 
-    # Scoring
+    # Input layout
+    st.markdown("<h2 style='font-size:22px; color:#1F618D;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
+
+    with col1:
+        age = st.slider("Age (Years)", 18, 90, 45)
+        bmi = st.number_input("BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
+        waist = st.number_input("Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
+
+    with col2:
+        activity = st.radio("Daily Physical Activity ≥30 min?", ["Yes", "No"])
+        diet = st.radio("Daily Fruit/Vegetable Intake?", ["Yes", "No"])
+        meds = st.radio("On Antihypertensive Medication?", ["Yes", "No"])
+        high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
+        family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
+
+    # Scoring logic (FINDRISC)
     score = 0
     if age >= 45 and age < 55: score += 2
     elif age >= 55 and age < 65: score += 3
@@ -63,10 +77,8 @@ with tab_ml:
     if bmi >= 25 and bmi < 30: score += 1
     elif bmi >= 30: score += 3
 
-    if (waist >= 94 and waist < 102 and family != "Female") or (waist >= 80 and waist < 88 and family == "Female"):
-        score += 3
-    elif (waist >= 102 and family != "Female") or (waist >= 88 and family == "Female"):
-        score += 4
+    if waist >= 94 and waist < 102: score += 3
+    elif waist >= 102: score += 4
 
     if activity == "No": score += 2
     if diet == "No": score += 1
@@ -76,18 +88,34 @@ with tab_ml:
     elif family == "Yes (parent/sibling/child)": score += 5
 
     # Risk interpretation
+    st.divider()
+    st.markdown("<h2 style='font-size:22px; color:#1F618D;'>📊 Your Risk Results</h2>", unsafe_allow_html=True)
     st.metric("FINDRISC Score", f"{score} / 26")
 
     if score < 7:
-        st.success("✅ Low Risk (<1% chance of diabetes in 10 years).")
+        st.success("✅ Low Risk — <1% chance of diabetes in 10 years.")
     elif score < 12:
-        st.warning("⚠️ Slightly Elevated Risk (~4% chance).")
+        st.info("ℹ️ Slightly Elevated Risk — ~4% chance.")
     elif score < 15:
-        st.warning("⚠️ Moderate Risk (~17% chance).")
+        st.warning("⚠️ Moderate Risk — ~17% chance.")
     elif score < 20:
-        st.error("⚠️ High Risk (~33% chance). Clinical consultation recommended.")
+        st.error("⚠️ High Risk — ~33% chance. Clinical consultation recommended.")
     else:
-        st.error("🚨 Very High Risk (>50% chance). Immediate medical evaluation advised.")
+        st.error("🚨 Very High Risk — >50% chance. Immediate medical evaluation advised.")
+
+    # Visual gauge
+    st.progress(int((score/26)*100))
+
+    # Clinical context
+    st.markdown("""
+    <h3 style='font-size:22px; color:#1F618D;'>📌 Clinical Notes</h3>
+    <ul style='font-size:18px; color:#2C3E50;'>
+        <li>Score is based on <b>validated FINDRISC model</b>.</li>
+        <li><b>BMI ≥ 25</b> and <b>waist circumference ≥ 94 cm (men) / 80 cm (women)</b> increase risk.</li>
+        <li><b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
+        <li>Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
+    </ul>
+    """, unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
