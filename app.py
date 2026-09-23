@@ -105,6 +105,7 @@ with tab_chat:
             "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
             "thanks": "You’re welcome! Stay healthy and keep monitoring your risk factors.",
             "bye": "Goodbye 👋 — remember, consistent lifestyle habits are key to prevention.",
+            "help": "You can ask me about BMI, glucose levels, exercise routines, diet tips, or general diabetes prevention strategies.",
             "bmi": "BMI evaluates weight relative to height (kg/m²). Normal range is 18.5–24.9. Higher BMIs increase insulin resistance risk.",
             "glucose": "Fasting plasma glucose <100 mg/dL is normal. 100–125 mg/dL = prediabetes. ≥126 mg/dL = diabetes.",
             "sugar": "Blood sugar levels above 126 mg/dL on multiple tests indicate diabetes.",
