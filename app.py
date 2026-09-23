@@ -38,70 +38,56 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Polished Dashboard)
+# TAB 1: AI PATIENT PREDICTOR (Validated FINDRISC Model)
 # ---------------------------------------------------------
-import altair as alt
-
 with tab_ml:
-    st.markdown("<h1 style='font-size:32px;'>🩺 AI Patient Clinical Risk Calculator</h1>", unsafe_allow_html=True)
-    st.markdown("""
-    <p style='font-size:18px;'>
-    Estimate diabetes likelihood using age, BMI, and plasma glucose.  
-    Features include <b>BMI = W / H²</b> and <b>Log(Glucose + 1)</b>.  
-    The model applies a logistic regression formula to calculate risk probability.
-    </p>
-    """, unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size:32px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+    st.write("Validated Finnish Diabetes Risk Score (FINDRISC) adapted for demonstration.")
 
-    # Input layout
-    col1, col2 = st.columns(2)
+    # Inputs
+    age = st.slider("Age (Years)", 18, 90, 45)
+    bmi = st.number_input("BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
+    waist = st.number_input("Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
+    activity = st.radio("Daily Physical Activity ≥30 min?", ["Yes", "No"])
+    diet = st.radio("Daily Fruit/Vegetable Intake?", ["Yes", "No"])
+    meds = st.radio("On Antihypertensive Medication?", ["Yes", "No"])
+    high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
+    family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
 
-    with col1:
-        age = st.slider("Age (Years)", 18, 90, 45)
-        glucose = st.number_input("Plasma Glucose Level (mg/dL)", 
-                                  min_value=30.0, max_value=400.0, value=145.0)
+    # Scoring
+    score = 0
+    if age >= 45 and age < 55: score += 2
+    elif age >= 55 and age < 65: score += 3
+    elif age >= 65: score += 4
 
-    with col2:
-        weight = st.number_input("Weight (kg)", min_value=30.0, max_value=200.0, value=78.0)
-        height = st.number_input("Height (meters)", min_value=1.0, max_value=2.3, value=1.72)
+    if bmi >= 25 and bmi < 30: score += 1
+    elif bmi >= 30: score += 3
 
-    # Feature Construction
-    bmi = weight / (height ** 2)
-    log_glucose = np.log1p(glucose)
+    if (waist >= 94 and waist < 102 and family != "Female") or (waist >= 80 and waist < 88 and family == "Female"):
+        score += 3
+    elif (waist >= 102 and family != "Female") or (waist >= 88 and family == "Female"):
+        score += 4
 
-    # Balanced logistic regression formula
-    z = -4.0 + (0.02 * age) + (0.06 * bmi) + (0.35 * log_glucose)
-    probability = 1 / (1 + np.exp(-z))
-    risk_pct = round(probability * 100, 1)
+    if activity == "No": score += 2
+    if diet == "No": score += 1
+    if meds == "Yes": score += 2
+    if high_glucose == "Yes": score += 5
+    if family == "Yes (grandparent/uncle/aunt)": score += 3
+    elif family == "Yes (parent/sibling/child)": score += 5
 
-    st.divider()
+    # Risk interpretation
+    st.metric("FINDRISC Score", f"{score} / 26")
 
-    # Results layout
-    res1, res2, res3 = st.columns(3)
-    res1.metric("Calculated BMI", f"{bmi:.1f} kg/m²")
-    res2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
-    res3.metric("Diabetes Risk Score", f"{risk_pct}%")
-
-    # Risk interpretation with styled cards
-    if risk_pct >= 70:
-        st.error("⚠️ High Risk — Immediate Clinical Consultation Recommended.")
-    elif risk_pct >= 40:
-        st.warning("⚠️ Moderate Risk — Monitor regularly and adopt preventive measures.")
+    if score < 7:
+        st.success("✅ Low Risk (<1% chance of diabetes in 10 years).")
+    elif score < 12:
+        st.warning("⚠️ Slightly Elevated Risk (~4% chance).")
+    elif score < 15:
+        st.warning("⚠️ Moderate Risk (~17% chance).")
+    elif score < 20:
+        st.error("⚠️ High Risk (~33% chance). Clinical consultation recommended.")
     else:
-        st.success("✅ Low Risk — Maintain healthy lifestyle.")
-
-    # Visual gauge (progress bar style)
-    st.markdown("<h3 style='font-size:22px;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
-    st.progress(int(risk_pct))
-
-    # Clinical context
-    st.markdown("""
-    <h3 style='font-size:22px;'>📌 Clinical Notes</h3>
-    <ul style='font-size:18px;'>
-        <li><b>BMI ≥ 25</b> indicates overweight, increasing diabetes risk.</li>
-        <li><b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
-        <li>Risk score now scales realistically: younger, healthy BMI, and normal glucose → low risk; older, high BMI, and high glucose → high risk.</li>
-    </ul>
-    """, unsafe_allow_html=True)
+        st.error("🚨 Very High Risk (>50% chance). Immediate medical evaluation advised.")
 
 
 # ---------------------------------------------------------
