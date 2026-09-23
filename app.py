@@ -77,7 +77,7 @@ with tab_ml:
 
 
 # ---------------------------------------------------------
-# TAB 2: AI CLINICAL CHATBOT (Smarter Assistant, input pinned at bottom)
+# TAB 2: AI CLINICAL CHATBOT 
 # ---------------------------------------------------------
 import difflib
 
@@ -90,15 +90,17 @@ with tab_chat:
         st.session_state.messages = [
             {"role": "assistant", "content": "Hello 👋! I’m your AI Health Assistant. You can ask me about BMI, glucose, exercise, diet, or general diabetes management."}
         ]
-        st.session_state.last_topic = None
+        st.session_state.last_topic = None  # Track context
 
-    # Display chat history FIRST
+    # Display chat history
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # Input bar LAST so it stays pinned at bottom
-    user_input = st.chat_input("Type your medical query here...")
+    # Input bar pinned at bottom
+    input_container = st.container()
+    with input_container:
+        user_input = st.chat_input("Type your medical query here...")
 
     if user_input:
         # Show user message
@@ -108,6 +110,7 @@ with tab_chat:
 
         # Smarter response logic
         query = user_input.lower()
+
         responses = {
             "hello": "Hi there 👋! How can I help you today?",
             "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
@@ -122,9 +125,9 @@ with tab_chat:
             "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk.",
             "reduce": "To reduce diabetes risk: maintain a healthy weight, eat balanced meals, exercise regularly, and monitor glucose levels.",
             "risk": f"Based on your last inputs, your calculated diabetes risk score was {risk_pct}%. Adjusting weight, age, or glucose will change this value.",
-            "lower bmi": "To lower BMI: focus on gradual weight loss through portion control, balanced nutrition, and consistent physical activity.",
-            "lower glucose": "To lower glucose: reduce refined carbs and sugary foods, increase fiber intake, stay hydrated, and exercise regularly.",
-            "lower sugar": "To lower blood sugar: monitor carbohydrate intake, avoid sugary drinks, eat smaller frequent meals, and include aerobic + resistance exercise."
+            "lower bmi": "To lower BMI: focus on gradual weight loss through portion control, balanced nutrition, and consistent physical activity. Even a 5–10% reduction in body weight can improve insulin sensitivity.",
+            "lower glucose": "To lower glucose: reduce refined carbs and sugary foods, increase fiber intake, stay hydrated, and exercise regularly. Medication may be needed if lifestyle changes aren’t enough.",
+            "lower sugar": "To lower blood sugar: monitor carbohydrate intake, avoid sugary drinks, eat smaller frequent meals, and include aerobic + resistance exercise. Consistency is key."
         }
 
         # Fuzzy matching
@@ -133,6 +136,7 @@ with tab_chat:
             reply = responses[best_match[0]]
             st.session_state.last_topic = best_match[0]
         else:
+            # Context-aware follow-up
             if "how much" in query and st.session_state.last_topic == "bmi":
                 reply = "A healthy BMI range is 18.5–24.9."
             elif "how much" in query and st.session_state.last_topic == "glucose":
@@ -144,6 +148,9 @@ with tab_chat:
         st.session_state.messages.append({"role": "assistant", "content": reply})
         with st.chat_message("assistant"):
             st.write(reply)
+
+        # Auto-scroll to bottom so input stays visible
+        st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # TAB 3: LIVE WHO GLOBAL DATA (Backend API)
