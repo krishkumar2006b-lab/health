@@ -36,6 +36,7 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
     "📊 State-wise Cost per DALY", 
     "🧠 ML Feature Importance"
 ])
+# -*- coding: utf-8 -*-
 
 # ---------------------------------------------------------
 # TAB 1: AI PATIENT PREDICTOR (Premium Dashboard Style)
