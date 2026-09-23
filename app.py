@@ -153,7 +153,7 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Backend API, Enhanced)
+# TAB 3: LIVE WHO GLOBAL DATA (Backend API, Enhanced with Clean Labels)
 # ---------------------------------------------------------
 import altair as alt
 
@@ -184,6 +184,14 @@ with tab_who:
         df_who = fetch_who_data()
 
     if df_who is not None and not df_who.empty:
+        # Map WHO codes to readable labels
+        sex_map = {
+            "SEX_FMLE": "Female",
+            "SEX_MLE": "Male",
+            "Both": "Both"
+        }
+        df_who["Sex"] = df_who["Sex"].map(sex_map).fillna(df_who["Sex"])
+
         st.success("✅ Live WHO data successfully retrieved!")
 
         # Show raw data
@@ -204,7 +212,7 @@ with tab_who:
         )
         st.altair_chart(chart, use_container_width=True)
 
-        # Bar chart by sex
+        # Bar chart by sex with clean labels
         st.markdown("### 🧍 Prevalence by Sex")
         sex_chart = alt.Chart(df_who).mark_bar().encode(
             x=alt.X('Sex:N', title='Sex'),
@@ -213,7 +221,8 @@ with tab_who:
             tooltip=['Sex', 'Prevalence (%)']
         ).properties(
             width=400,
-            height=300
+            height=300,
+            title="Average Prevalence by Sex"
         )
         st.altair_chart(sex_chart, use_container_width=True)
 
