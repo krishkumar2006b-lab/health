@@ -237,9 +237,7 @@ with tab_ml:
         <ul style="
             font-size:17px;
             color:white;
-            line-height:1.9;
-            margin:0;
-            padding-left:18px
+            line-height:1
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
