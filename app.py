@@ -153,7 +153,7 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Clean & Interactive)
+# TAB 3: LIVE WHO GLOBAL DATA (Clean Dashboard Style)
 # ---------------------------------------------------------
 import altair as alt
 
@@ -169,7 +169,7 @@ with tab_who:
             if res.status_code == 200:
                 data = res.json().get('value', [])
                 records = []
-                for item in data[:200]:  # fetch more records for richer visualization
+                for item in data:  # pull all records
                     records.append({
                         "Country": item.get('SpatialDim', 'N/A'),
                         "Year": int(item.get('TimeDim', 0)),
@@ -190,40 +190,45 @@ with tab_who:
 
         st.success("✅ Live WHO data successfully retrieved!")
 
-        # Country selector
+        # Sidebar filters for clean interactivity
+        st.markdown("### 🔎 Filter Options")
         countries = sorted(df_who["Country"].unique())
-        selected_country = st.selectbox("Select a country to view trends:", countries)
+        selected_country = st.selectbox("Select a country:", countries)
+        selected_sex = st.radio("Select sex:", ["Both", "Male", "Female"])
 
-        # Filter by selected country
-        country_data = df_who[df_who["Country"] == selected_country]
+        # Filter data
+        filtered = df_who[(df_who["Country"] == selected_country) & (df_who["Sex"] == selected_sex)]
 
         # Line chart for prevalence trends
-        st.markdown(f"### 📈 Prevalence Trends in {selected_country}")
-        trend_chart = alt.Chart(country_data).mark_line(point=True).encode(
+        st.markdown(f"### 📈 Prevalence Trends in {selected_country} ({selected_sex})")
+        trend_chart = alt.Chart(filtered).mark_line(point=True).encode(
             x=alt.X('Year:O', title='Year'),
             y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
-            color='Sex:N',
-            tooltip=['Year', 'Sex', 'Prevalence (%)']
+            tooltip=['Year', 'Prevalence (%)']
         ).properties(
             width=700,
             height=400,
-            title=f"Diabetes Prevalence Trends in {selected_country}"
+            title=f"Diabetes Prevalence Trends in {selected_country} ({selected_sex})"
         )
         st.altair_chart(trend_chart, use_container_width=True)
 
-        # Bar chart by sex (averages)
-        st.markdown("### 🧍 Average Prevalence by Sex")
-        sex_chart = alt.Chart(country_data).mark_bar().encode(
+        # Comparison bar chart by sex
+        st.markdown(f"### 🧍 Average Prevalence by Sex in {selected_country}")
+        sex_chart = alt.Chart(df_who[df_who["Country"] == selected_country]).mark_bar().encode(
             x=alt.X('Sex:N', title='Sex'),
             y=alt.Y('Prevalence (%):Q', aggregate='mean'),
             color='Sex:N',
             tooltip=['Sex', 'Prevalence (%)']
         ).properties(
-            width=400,
+            width=500,
             height=300,
             title=f"Average Prevalence by Sex in {selected_country}"
         )
         st.altair_chart(sex_chart, use_container_width=True)
+
+        # Show clean table snapshot
+        st.markdown("### 📊 Data Snapshot")
+        st.dataframe(filtered.sort_values("Year"), use_container_width=True)
 
     else:
         st.warning("⚠️ WHO API endpoint busy. Showing cached reference data instead.")
@@ -248,6 +253,7 @@ with tab_who:
             title="Cached Prevalence Rates"
         )
         st.altair_chart(chart, use_container_width=True)
+
 
 # ---------------------------------------------------------
 # TAB 4: DALY COST ANALYSIS
