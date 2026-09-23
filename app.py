@@ -41,6 +41,7 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 # TAB 1: AI PATIENT PREDICTOR (Premium Dashboard Style)
 # ---------------------------------------------------------
 import altair as alt
+import pandas as pd
 
 with tab_ml:
     # Title
@@ -54,22 +55,22 @@ with tab_ml:
 
     st.divider()
 
-    # Input section
-    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:10px; border-radius:8px;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
+    # Input section styled like a card
+    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:12px; border-radius:8px;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        age = st.slider("Age (Years)", 18, 90, 33)
-        bmi = st.number_input("BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
-        waist = st.number_input("Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
+        age = st.slider("🧍 Age (Years)", 18, 90, 33)
+        bmi = st.number_input("⚖️ BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
+        waist = st.number_input("📏 Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
 
     with col2:
-        activity = st.radio("Daily Physical Activity ≥30 min?", ["Yes", "No"])
-        diet = st.radio("Daily Fruit/Vegetable Intake?", ["Yes", "No"])
-        meds = st.radio("On Antihypertensive Medication?", ["Yes", "No"])
-        high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
-        family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
+        activity = st.radio("🏃 Daily Physical Activity ≥30 min?", ["Yes", "No"])
+        diet = st.radio("🍎 Daily Fruit/Vegetable Intake?", ["Yes", "No"])
+        meds = st.radio("💊 On Antihypertensive Medication?", ["Yes", "No"])
+        high_glucose = st.radio("🩸 History of High Blood Glucose?", ["Yes", "No"])
+        family = st.radio("👨‍👩‍👧 Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
 
     # FINDRISC scoring
     score = 0
@@ -92,7 +93,7 @@ with tab_ml:
 
     # Results
     st.divider()
-    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:10px; border-radius:8px;'>📊 Your Risk Results</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:12px; border-radius:8px;'>📊 Your Risk Results</h2>", unsafe_allow_html=True)
     st.metric("FINDRISC Score", f"{score} / 26")
 
     if score < 7:
@@ -115,16 +116,17 @@ with tab_ml:
     st.markdown("<h3 style='font-size:22px; color:white;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
     st.progress(int((score/26)*100))
 
-    # Comparison chart
+    # Comparison chart (ordered Very High → High → Moderate → Slightly Elevated → Low)
     st.markdown("<h3 style='font-size:22px; color:white;'>📊 Population Risk Comparison</h3>", unsafe_allow_html=True)
     categories = pd.DataFrame({
-        "Category": ["Low (<7)", "Slightly Elevated (7-11)", "Moderate (12-14)", "High (15-20)", "Very High (>20)"],
-        "Probability (%)": [1, 4, 17, 33, 50]
+        "Category": ["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"],
+        "Probability (%)": [50, 33, 17, 4, 1]
     })
     chart = alt.Chart(categories).mark_bar().encode(
-        x=alt.X("Category:N", title="Risk Category"),
+        x=alt.X("Category:N", sort=["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"], title="Risk Category"),
         y=alt.Y("Probability (%):Q", title="10-Year Diabetes Probability"),
-        color=alt.Color("Category:N", scale=alt.Scale(scheme="reds")),
+        color=alt.Color("Category:N", scale=alt.Scale(domain=["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"],
+                                                     range=["darkred", "red", "orange", "gold", "green"])),
         tooltip=["Category", "Probability (%)"]
     ).properties(width=700, height=400, title="Risk Categories vs Probability")
     st.altair_chart(chart, use_container_width=True)
@@ -139,6 +141,7 @@ with tab_ml:
         <li>Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
     </ul>
     """, unsafe_allow_html=True)
+
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
