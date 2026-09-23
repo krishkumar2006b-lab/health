@@ -38,23 +38,25 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Appealing Input Section)
+# TAB 1: AI PATIENT PREDICTOR (Premium Dashboard Style)
 # ---------------------------------------------------------
+import altair as alt
+
 with tab_ml:
-    st.markdown("<h1 style='font-size:36px; color:white; background-color:#2C3E50; padding:10px; border-radius:8px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+    # Title
+    st.markdown("<h1 style='font-size:36px; color:white; background-color:#2C3E50; padding:12px; border-radius:8px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
     st.markdown("""
-    <p style='font-size:18px; color:white; background-color:#34495E; padding:8px; border-radius:6px;'>
-    Estimate your <b>10‑year risk</b> of developing type 2 diabetes using the validated FINDRISC model.  
-    Enter your details below to calculate your personalized score.
+    <p style='font-size:18px; color:white; background-color:#34495E; padding:10px; border-radius:6px;'>
+    This calculator uses the <b>validated Finnish Diabetes Risk Score (FINDRISC)</b> model.  
+    It estimates your <b>10‑year risk</b> of developing type 2 diabetes based on lifestyle and clinical factors.
     </p>
     """, unsafe_allow_html=True)
 
     st.divider()
 
-    # Stylish input section
+    # Input section
     st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:10px; border-radius:8px;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
 
-    # Reordered layout for logical flow
     col1, col2 = st.columns(2)
 
     with col1:
@@ -69,8 +71,7 @@ with tab_ml:
         high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
         family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
 
-
-    # Scoring logic (FINDRISC)
+    # FINDRISC scoring
     score = 0
     if age >= 45 and age < 55: score += 2
     elif age >= 55 and age < 65: score += 3
@@ -89,9 +90,9 @@ with tab_ml:
     if family == "Yes (grandparent/uncle/aunt)": score += 3
     elif family == "Yes (parent/sibling/child)": score += 5
 
-    # Risk interpretation
+    # Results
     st.divider()
-    st.markdown("<h2 style='font-size:22px; color:#1F618D;'>📊 Your Risk Results</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:10px; border-radius:8px;'>📊 Your Risk Results</h2>", unsafe_allow_html=True)
     st.metric("FINDRISC Score", f"{score} / 26")
 
     if score < 7:
@@ -111,11 +112,11 @@ with tab_ml:
         risk_level = "Very High"
 
     # Visual gauge
-    st.markdown("<h3 style='font-size:22px; color:#1F618D;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:22px; color:white;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
     st.progress(int((score/26)*100))
 
     # Comparison chart
-    st.markdown("<h3 style='font-size:22px; color:#1F618D;'>📊 Population Risk Comparison</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:22px; color:white;'>📊 Population Risk Comparison</h3>", unsafe_allow_html=True)
     categories = pd.DataFrame({
         "Category": ["Low (<7)", "Slightly Elevated (7-11)", "Moderate (12-14)", "High (15-20)", "Very High (>20)"],
         "Probability (%)": [1, 4, 17, 33, 50]
@@ -128,17 +129,16 @@ with tab_ml:
     ).properties(width=700, height=400, title="Risk Categories vs Probability")
     st.altair_chart(chart, use_container_width=True)
 
-    # Clinical context
+    # Clinical notes
     st.markdown("""
-    <h3 style='font-size:22px; color:#1F618D;'>📌 Clinical Notes</h3>
-    <ul style='font-size:18px; color:#2C3E50;'>
+    <h3 style='font-size:22px; color:white;'>📌 Clinical Notes</h3>
+    <ul style='font-size:18px; color:white;'>
         <li>Score is based on <b>validated FINDRISC model</b>.</li>
         <li><b>BMI ≥ 25</b> and <b>waist circumference ≥ 94 cm (men) / 80 cm (women)</b> increase risk.</li>
         <li><b>Glucose ≥ 126 mg/dL</b> is a diagnostic threshold for diabetes.</li>
         <li>Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
     </ul>
     """, unsafe_allow_html=True)
-
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
