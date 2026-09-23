@@ -41,355 +41,911 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 # TAB 1: AI PATIENT PREDICTOR (Premium Dashboard Style)
 # ---------------------------------------------------------
 
-# ---------------------------------------------------------
-# PATIENT DETAILS — PREMIUM CARD DESIGN
-# ---------------------------------------------------------
+import altair as alt
+import pandas as pd
+import streamlit as st
 
-st.markdown("""
-<style>
-    /* Main input card */
+
+with tab_ml:
+
+    # =====================================================
+    # PAGE TITLE
+    # =====================================================
+
+    st.markdown("""
+    <h1 style="
+        font-size:36px;
+        color:white;
+        background:linear-gradient(135deg,#1F618D,#2C3E50);
+        padding:16px 20px;
+        border-radius:12px;
+        margin-bottom:10px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    ">
+        🩺 Diabetes Risk Calculator
+        <span style="font-size:22px; color:#85C1E9;">
+            (FINDRISC)
+        </span>
+    </h1>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("""
+    <div style="
+        font-size:17px;
+        color:white;
+        background:linear-gradient(135deg,#34495E,#2C3E50);
+        padding:15px 18px;
+        border-radius:10px;
+        margin-bottom:18px;
+        line-height:1.6;
+        border-left:5px solid #5DADE2;
+    ">
+        This calculator uses the <b>validated Finnish Diabetes Risk Score
+        (FINDRISC)</b> model.<br>
+        It estimates your <b>10-year risk</b> of developing type 2 diabetes
+        based on lifestyle and clinical factors.
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.divider()
+
+
+    # =====================================================
+    # PREMIUM INPUT STYLES
+    # =====================================================
+
+    st.markdown("""
+    <style>
+
+    /* -----------------------------------------
+       MAIN PATIENT CARD
+    ----------------------------------------- */
+
     .patient-card {
-        background: linear-gradient(145deg, #172A3A, #203A4F);
+        background: linear-gradient(
+            145deg,
+            #172A3A,
+            #203A4F
+        );
+
         border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 18px;
-        padding: 24px 26px;
-        margin: 10px 0 22px 0;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.20);
+
+        border-radius:18px;
+
+        padding:22px 24px;
+
+        margin:8px 0 18px 0;
+
+        box-shadow:
+            0 8px 25px rgba(0,0,0,0.20);
     }
 
-    /* Section headings */
+
+    /* -----------------------------------------
+       SECTION HEADER
+    ----------------------------------------- */
+
     .input-section-title {
-        color: #FFFFFF;
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 4px;
+        color:#FFFFFF;
+
+        font-size:21px;
+
+        font-weight:700;
+
+        margin-bottom:5px;
     }
+
 
     .input-section-subtitle {
-        color: #AFC4D4;
-        font-size: 14px;
-        margin-bottom: 18px;
+        color:#AFC4D4;
+
+        font-size:14px;
+
+        margin-bottom:10px;
     }
 
-    /* Individual mini cards */
+
+    /* -----------------------------------------
+       INPUT MINI CARDS
+    ----------------------------------------- */
+
     .input-card {
-        background: rgba(255,255,255,0.055);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
-        padding: 14px 16px;
-        margin-bottom: 14px;
-        transition: all 0.2s ease;
+
+        background:rgba(255,255,255,0.055);
+
+        border:1px solid rgba(255,255,255,0.08);
+
+        border-radius:14px;
+
+        padding:14px 16px;
+
+        margin-bottom:7px;
+
+        box-shadow:
+            0 3px 10px rgba(0,0,0,0.10);
     }
 
-    .input-card:hover {
-        background: rgba(255,255,255,0.08);
-        border-color: rgba(52,152,219,0.45);
-    }
 
     .input-label {
-        color: #FFFFFF;
-        font-size: 15px;
-        font-weight: 600;
-        margin-bottom: 3px;
+
+        color:#FFFFFF;
+
+        font-size:15px;
+
+        font-weight:600;
+
+        margin-bottom:3px;
     }
+
 
     .input-description {
-        color: #9FB4C4;
-        font-size: 12px;
-        margin-bottom: 8px;
+
+        color:#9FB4C4;
+
+        font-size:12px;
+
+        margin-bottom:5px;
     }
 
-    /* Info badges */
+
+    /* -----------------------------------------
+       INFO BADGE
+    ----------------------------------------- */
+
     .info-badge {
-        display: inline-block;
-        background: rgba(52,152,219,0.16);
-        color: #5DADE2;
-        padding: 4px 9px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 3px;
+
+        display:inline-block;
+
+        background:rgba(52,152,219,0.16);
+
+        color:#5DADE2;
+
+        padding:5px 10px;
+
+        border-radius:20px;
+
+        font-size:11px;
+
+        font-weight:600;
     }
 
-    /* Streamlit widget spacing */
-    div[data-testid="stSlider"],
-    div[data-testid="stNumberInput"],
-    div[data-testid="stRadio"] {
-        margin-top: -5px;
-    }
 
-    /* Radio buttons */
+    /* -----------------------------------------
+       RADIO BUTTONS
+    ----------------------------------------- */
+
     div[role="radiogroup"] {
-        gap: 8px;
+
+        gap:8px;
+
     }
+
 
     div[role="radiogroup"] label {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 10px;
-        padding: 7px 12px;
+
+        background:rgba(255,255,255,0.05);
+
+        border:1px solid rgba(255,255,255,0.08);
+
+        border-radius:10px;
+
+        padding:7px 12px;
+
+        transition:0.2s ease;
     }
 
-    /* Divider */
+
+    div[role="radiogroup"] label:hover {
+
+        background:rgba(52,152,219,0.15);
+
+        border-color:#3498DB;
+    }
+
+
+    /* -----------------------------------------
+       DIVIDER
+    ----------------------------------------- */
+
     .soft-divider {
-        height: 1px;
-        background: linear-gradient(
+
+        height:1px;
+
+        background:linear-gradient(
             90deg,
             transparent,
             rgba(255,255,255,0.15),
             transparent
         );
-        margin: 18px 0;
+
+        margin:20px 0;
     }
-</style>
-""", unsafe_allow_html=True)
 
 
-# Header
-st.markdown("""
-<div class="patient-card">
+    /* -----------------------------------------
+       COMPLETION MESSAGE
+    ----------------------------------------- */
 
-    <div class="input-section-title">
-        👤 Patient Information
-    </div>
+    .completion-box {
 
-    <div class="input-section-subtitle">
-        Enter the following information to calculate your
-        <b>10-year type 2 diabetes risk</b>.
-    </div>
+        text-align:center;
 
-    <span class="info-badge">🔒 Your inputs are used only for this calculation</span>
+        color:#AFC4D4;
 
-</div>
-""", unsafe_allow_html=True)
+        font-size:13px;
 
+        padding:8px;
 
-# ---------------------------------------------------------
-# TWO-COLUMN INPUT LAYOUT
-# ---------------------------------------------------------
+        margin-bottom:10px;
+    }
 
-col1, col2 = st.columns(2, gap="large")
+    </style>
+    """, unsafe_allow_html=True)
 
 
-# =========================================================
-# LEFT COLUMN — BODY & AGE
-# =========================================================
-
-with col1:
+    # =====================================================
+    # ENTER YOUR DETAILS HEADER
+    # =====================================================
 
     st.markdown("""
     <div class="patient-card">
 
         <div class="input-section-title">
-            📋 Basic Measurements
+            📋 Enter Your Details
         </div>
 
         <div class="input-section-subtitle">
-            Your age and body measurements
+            Provide your basic measurements, lifestyle information,
+            and medical history to calculate your FINDRISC score.
         </div>
+
+        <span class="info-badge">
+            🔒 Your information is used only for this calculation
+        </span>
 
     </div>
     """, unsafe_allow_html=True)
 
 
-    # AGE
-    st.markdown("""
-    <div class="input-card">
-        <div class="input-label">🧍 Age</div>
-        <div class="input-description">
-            Your current age in years
+    # =====================================================
+    # TWO COLUMN INPUT SECTION
+    # =====================================================
+
+    col1, col2 = st.columns(2, gap="large")
+
+
+    # =====================================================
+    # LEFT COLUMN — BASIC MEASUREMENTS
+    # =====================================================
+
+    with col1:
+
+        st.markdown("""
+        <div class="patient-card">
+
+            <div class="input-section-title">
+                📏 Basic Measurements
+            </div>
+
+            <div class="input-section-subtitle">
+                Enter your age and body measurements.
+            </div>
+
         </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    age = st.slider(
-        "Age (Years)",
-        min_value=18,
-        max_value=90,
-        value=33,
-        label_visibility="collapsed"
-    )
+        """, unsafe_allow_html=True)
 
 
-    # BMI
-    st.markdown("""
-    <div class="input-card">
-        <div class="input-label">⚖️ Body Mass Index (BMI)</div>
-        <div class="input-description">
-            Weight relative to your height
+        # -----------------------------
+        # AGE
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                🧍 Age
+            </div>
+
+            <div class="input-description">
+                Your current age in years
+            </div>
+
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    bmi = st.number_input(
-        "BMI (kg/m²)",
-        min_value=15.0,
-        max_value=50.0,
-        value=24.0,
-        step=0.1,
-        label_visibility="collapsed"
-    )
+        age = st.slider(
+            "Age",
+            min_value=18,
+            max_value=90,
+            value=33,
+            label_visibility="collapsed"
+        )
 
 
-    # WAIST
-    st.markdown("""
-    <div class="input-card">
-        <div class="input-label">📏 Waist Circumference</div>
-        <div class="input-description">
-            Measure around your waist in centimeters
+        # -----------------------------
+        # BMI
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                ⚖️ Body Mass Index (BMI)
+            </div>
+
+            <div class="input-description">
+                Weight relative to your height
+            </div>
+
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    waist = st.number_input(
-        "Waist Circumference (cm)",
-        min_value=50.0,
-        max_value=150.0,
-        value=90.0,
-        step=0.5,
-        label_visibility="collapsed"
-    )
+        bmi = st.number_input(
+            "BMI",
+            min_value=15.0,
+            max_value=50.0,
+            value=24.0,
+            step=0.1,
+            label_visibility="collapsed"
+        )
 
 
-# =========================================================
-# RIGHT COLUMN — LIFESTYLE & MEDICAL HISTORY
-# =========================================================
+        # -----------------------------
+        # WAIST
+        # -----------------------------
 
-with col2:
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                📏 Waist Circumference
+            </div>
+
+            <div class="input-description">
+                Enter your waist circumference in centimeters
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        waist = st.number_input(
+            "Waist Circumference",
+            min_value=50.0,
+            max_value=150.0,
+            value=90.0,
+            step=0.5,
+            label_visibility="collapsed"
+        )
+
+
+    # =====================================================
+    # RIGHT COLUMN — LIFESTYLE & MEDICAL HISTORY
+    # =====================================================
+
+    with col2:
+
+        st.markdown("""
+        <div class="patient-card">
+
+            <div class="input-section-title">
+                ❤️ Lifestyle & Medical History
+            </div>
+
+            <div class="input-section-subtitle">
+                Tell us about your daily habits and health history.
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+
+        # -----------------------------
+        # PHYSICAL ACTIVITY
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                🏃 Physical Activity
+            </div>
+
+            <div class="input-description">
+                Do you get at least 30 minutes of physical activity each day?
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        activity = st.radio(
+            "Physical Activity",
+            ["Yes", "No"],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+
+
+        # -----------------------------
+        # DIET
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                🍎 Fruit & Vegetable Intake
+            </div>
+
+            <div class="input-description">
+                Do you eat fruits or vegetables every day?
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        diet = st.radio(
+            "Fruit and Vegetable Intake",
+            ["Yes", "No"],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+
+
+        # -----------------------------
+        # MEDICATION
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                💊 Blood Pressure Medication
+            </div>
+
+            <div class="input-description">
+                Are you currently taking medication for high blood pressure?
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        meds = st.radio(
+            "Antihypertensive Medication",
+            ["Yes", "No"],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+
+
+        # -----------------------------
+        # HIGH GLUCOSE
+        # -----------------------------
+
+        st.markdown("""
+        <div class="input-card">
+
+            <div class="input-label">
+                🩸 History of High Blood Glucose
+            </div>
+
+            <div class="input-description">
+                Have you ever been told that your blood glucose was high?
+            </div>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        high_glucose = st.radio(
+            "History of High Blood Glucose",
+            ["Yes", "No"],
+            horizontal=True,
+            label_visibility="collapsed"
+        )
+
+
+    # =====================================================
+    # FAMILY HISTORY — FULL WIDTH
+    # =====================================================
 
     st.markdown("""
     <div class="patient-card">
 
         <div class="input-section-title">
-            ❤️ Lifestyle & Medical History
+            👨‍👩‍👧 Family History of Diabetes
         </div>
 
         <div class="input-section-subtitle">
-            Tell us about your daily habits and health history
+            Select the closest relationship that applies to you.
         </div>
 
     </div>
     """, unsafe_allow_html=True)
 
 
-    # PHYSICAL ACTIVITY
-    st.markdown("""
-    <div class="input-card">
-        <div class="input-label">🏃 Physical Activity</div>
-        <div class="input-description">
-            Do you get at least 30 minutes of physical activity each day?
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    activity = st.radio(
-        "Physical Activity",
-        ["Yes", "No"],
+    family = st.radio(
+        "Family History",
+        [
+            "No",
+            "Yes (grandparent/uncle/aunt)",
+            "Yes (parent/sibling/child)"
+        ],
         horizontal=True,
         label_visibility="collapsed"
     )
 
 
-    # FRUIT / VEGETABLE
+    # =====================================================
+    # COMPLETION MESSAGE
+    # =====================================================
+
     st.markdown("""
-    <div class="input-card">
-        <div class="input-label">🥗 Fruit & Vegetable Intake</div>
-        <div class="input-description">
-            Do you eat fruits or vegetables every day?
-        </div>
+    <div class="soft-divider"></div>
+
+    <div class="completion-box">
+        ✓ All required information entered
     </div>
     """, unsafe_allow_html=True)
 
-    diet = st.radio(
-        "Fruit and Vegetable Intake",
-        ["Yes", "No"],
-        horizontal=True,
-        label_visibility="collapsed"
+
+    # =====================================================
+    # FINDRISC SCORING
+    # =====================================================
+
+    score = 0
+
+
+    # AGE SCORE
+    if age >= 45 and age < 55:
+        score += 2
+
+    elif age >= 55 and age < 65:
+        score += 3
+
+    elif age >= 65:
+        score += 4
+
+
+    # BMI SCORE
+    if bmi >= 25 and bmi < 30:
+        score += 1
+
+    elif bmi >= 30:
+        score += 3
+
+
+    # WAIST SCORE
+    if waist >= 94 and waist < 102:
+        score += 3
+
+    elif waist >= 102:
+        score += 4
+
+
+    # PHYSICAL ACTIVITY SCORE
+    if activity == "No":
+        score += 2
+
+
+    # DIET SCORE
+    if diet == "No":
+        score += 1
+
+
+    # MEDICATION SCORE
+    if meds == "Yes":
+        score += 2
+
+
+    # HIGH GLUCOSE SCORE
+    if high_glucose == "Yes":
+        score += 5
+
+
+    # FAMILY HISTORY SCORE
+    if family == "Yes (grandparent/uncle/aunt)":
+        score += 3
+
+    elif family == "Yes (parent/sibling/child)":
+        score += 5
+
+
+    # =====================================================
+    # RESULTS SECTION
+    # =====================================================
+
+    st.divider()
+
+
+    st.markdown("""
+    <h2 style="
+        font-size:24px;
+        color:white;
+        background:linear-gradient(135deg,#1F618D,#2874A6);
+        padding:13px 16px;
+        border-radius:10px;
+        box-shadow:0 5px 15px rgba(0,0,0,0.20);
+    ">
+        📊 Your Risk Results
+    </h2>
+    """, unsafe_allow_html=True)
+
+
+    # SCORE
+    st.metric(
+        "FINDRISC Score",
+        f"{score} / 26"
     )
 
 
-    # BLOOD PRESSURE MEDICATION
-    st.markdown("""
-    <div class="input-card">
-        <div class="input-label">💊 Blood Pressure Medication</div>
-        <div class="input-description">
-            Are you currently taking medication for high blood pressure?
+    # =====================================================
+    # RISK CATEGORY
+    # =====================================================
+
+    if score < 7:
+
+        st.success(
+            "✅ Low Risk — <1% chance of diabetes in 10 years."
+        )
+
+        risk_level = "Low"
+
+
+    elif score < 12:
+
+        st.info(
+            "ℹ️ Slightly Elevated Risk — ~4% chance."
+        )
+
+        risk_level = "Slightly Elevated"
+
+
+    elif score < 15:
+
+        st.warning(
+            "⚠️ Moderate Risk — ~17% chance."
+        )
+
+        risk_level = "Moderate"
+
+
+    elif score < 20:
+
+        st.error(
+            "⚠️ High Risk — ~33% chance. Clinical consultation recommended."
+        )
+
+        risk_level = "High"
+
+
+    else:
+
+        st.error(
+            "🚨 Very High Risk — >50% chance. Immediate medical evaluation advised."
+        )
+
+        risk_level = "Very High"
+
+
+    # =====================================================
+    # VISUAL GAUGE
+    # =====================================================
+
+    st.markdown(
+        "<h3 style='font-size:22px; color:white;'>📊 Risk Gauge</h3>",
+        unsafe_allow_html=True
+    )
+
+
+    st.progress(
+        int((score / 26) * 100)
+    )
+
+
+    # =====================================================
+    # SCORE DISPLAY CARD
+    # =====================================================
+
+    st.markdown(f"""
+    <div style="
+        background:linear-gradient(135deg,#172A3A,#203A4F);
+        border-radius:15px;
+        padding:18px;
+        margin:15px 0;
+        text-align:center;
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    ">
+
+        <div style="
+            color:#AFC4D4;
+            font-size:14px;
+        ">
+            CURRENT RISK CATEGORY
         </div>
+
+        <div style="
+            color:#5DADE2;
+            font-size:28px;
+            font-weight:700;
+            margin-top:5px;
+        ">
+            {risk_level}
+        </div>
+
+        <div style="
+            color:#FFFFFF;
+            font-size:15px;
+            margin-top:4px;
+        ">
+            FINDRISC Score: <b>{score}/26</b>
+        </div>
+
     </div>
     """, unsafe_allow_html=True)
 
-    meds = st.radio(
-        "Antihypertensive Medication",
-        ["Yes", "No"],
-        horizontal=True,
-        label_visibility="collapsed"
+
+    # =====================================================
+    # POPULATION RISK COMPARISON
+    # =====================================================
+
+    st.markdown(
+        "<h3 style='font-size:22px; color:white;'>📊 Population Risk Comparison</h3>",
+        unsafe_allow_html=True
     )
 
 
-    # HIGH BLOOD GLUCOSE
+    categories = pd.DataFrame({
+        "Category": [
+            "Very High (>20)",
+            "High (15-20)",
+            "Moderate (12-14)",
+            "Slightly Elevated (7-11)",
+            "Low (<7)"
+        ],
+
+        "Probability (%)": [
+            50,
+            33,
+            17,
+            4,
+            1
+        ]
+    })
+
+
+    chart = alt.Chart(categories).mark_bar(
+        cornerRadiusTopLeft=6,
+        cornerRadiusTopRight=6
+    ).encode(
+
+        x=alt.X(
+            "Category:N",
+
+            sort=[
+                "Very High (>20)",
+                "High (15-20)",
+                "Moderate (12-14)",
+                "Slightly Elevated (7-11)",
+                "Low (<7)"
+            ],
+
+            title="Risk Category",
+
+            axis=alt.Axis(
+                labelAngle=-20,
+                labelColor="white",
+                titleColor="white"
+            )
+        ),
+
+        y=alt.Y(
+            "Probability (%):Q",
+
+            title="10-Year Diabetes Probability",
+
+            axis=alt.Axis(
+                labelColor="white",
+                titleColor="white"
+            )
+        ),
+
+        color=alt.Color(
+            "Category:N",
+
+            scale=alt.Scale(
+                domain=[
+                    "Very High (>20)",
+                    "High (15-20)",
+                    "Moderate (12-14)",
+                    "Slightly Elevated (7-11)",
+                    "Low (<7)"
+                ],
+
+                range=[
+                    "darkred",
+                    "red",
+                    "orange",
+                    "gold",
+                    "green"
+                ]
+            ),
+
+            legend=None
+        ),
+
+        tooltip=[
+            "Category",
+            "Probability (%)"
+        ]
+
+    ).properties(
+        width=700,
+        height=400,
+        title="Risk Categories vs Probability"
+    )
+
+
+    st.altair_chart(
+        chart,
+        use_container_width=True
+    )
+
+
+    # =====================================================
+    # CLINICAL NOTES
+    # =====================================================
+
     st.markdown("""
-    <div class="input-card">
-        <div class="input-label">🩸 History of High Blood Glucose</div>
-        <div class="input-description">
-            Have you ever been told that your blood glucose was high?
-        </div>
+    <h3 style="
+        font-size:22px;
+        color:white;
+        margin-top:20px;
+    ">
+        📌 Clinical Notes
+    </h3>
+
+    <div style="
+        background:linear-gradient(135deg,#172A3A,#203A4F);
+        padding:18px 22px;
+        border-radius:14px;
+        border-left:5px solid #5DADE2;
+        box-shadow:0 5px 15px rgba(0,0,0,0.18);
+    ">
+
+        <ul style="
+            font-size:16px;
+            color:white;
+            line-height:1.8;
+            margin-bottom:0;
+        ">
+
+            <li>
+                Score is based on the
+                <b>validated FINDRISC model</b>.
+            </li>
+
+            <li>
+                <b>BMI ≥ 25</b> and waist circumference
+                <b>≥ 94 cm (men) / 80 cm (women)</b>
+                increase risk.
+            </li>
+
+            <li>
+                <b>Glucose ≥ 126 mg/dL</b> is a diagnostic
+                threshold for diabetes.
+            </li>
+
+            <li>
+                Risk categories are tied to published
+                probabilities (1%, 4%, 17%, 33%, 50%).
+            </li>
+
+        </ul>
+
     </div>
     """, unsafe_allow_html=True)
-
-    high_glucose = st.radio(
-        "History of High Blood Glucose",
-        ["Yes", "No"],
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-
-
-# =========================================================
-# FAMILY HISTORY — FULL WIDTH CARD
-# =========================================================
-
-st.markdown("""
-<div class="patient-card">
-
-    <div class="input-section-title">
-        👨‍👩‍👧 Family History of Diabetes
-    </div>
-
-    <div class="input-section-subtitle">
-        Select the closest relationship that applies to you.
-    </div>
-
-</div>
-""", unsafe_allow_html=True)
-
-family = st.radio(
-    "Family History",
-    [
-        "No",
-        "Yes (grandparent/uncle/aunt)",
-        "Yes (parent/sibling/child)"
-    ],
-    horizontal=True,
-    label_visibility="collapsed"
-)
-
-
-# =========================================================
-# INPUT SUMMARY
-# =========================================================
-
-st.markdown("""
-<div class="soft-divider"></div>
-
-<div style="
-    text-align:center;
-    color:#AFC4D4;
-    font-size:13px;
-    margin-bottom:8px;
-">
-    ✓ All required information entered
-</div>
-""", unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------
