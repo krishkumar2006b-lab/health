@@ -77,15 +77,16 @@ with tab_ml:
 
 
 # ---------------------------------------------------------
-# TAB 2: AI CLINICAL CHATBOT (Smarter Rules)
+# TAB 2: AI CLINICAL CHATBOT (Enhanced Conversational Assistant)
 # ---------------------------------------------------------
 with tab_chat:
-    st.header("AI Healthcare Assistant")
-    st.write("Ask questions regarding diabetes prevention, glucose management, exercise guidelines, or risk factors.")
+    st.header("🤖 AI Healthcare Assistant")
+    st.write("Ask me about diabetes prevention, BMI, glucose, exercise, diet tips, or lifestyle changes.")
 
+    # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Hello 👋! I am your AI Health Assistant. You can ask me about BMI, glucose, exercise, diet, or general diabetes management."}
+            {"role": "assistant", "content": "Hello 👋! I’m your AI Health Assistant. You can ask me about BMI, glucose, exercise, diet, or general diabetes management."}
         ]
 
     # Display chat history
@@ -93,13 +94,15 @@ with tab_chat:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # User input
-    if user_input := st.chat_input("Type your medical query here..."):
+    # Input bar at bottom
+    user_input = st.chat_input("Type your medical query here...")
+
+    if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
             st.write(user_input)
 
-        # Keyword-based responses
+        # Keyword-based responses with intent mapping
         responses = {
             "hello": "Hi there 👋! How can I help you today?",
             "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
@@ -111,7 +114,8 @@ with tab_chat:
             "sugar": "Blood sugar levels above 126 mg/dL on multiple tests indicate diabetes.",
             "exercise": "150+ minutes of moderate activity weekly improves insulin sensitivity and reduces risk.",
             "workout": "Resistance training plus aerobic exercise helps regulate glucose.",
-            "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk."
+            "diet": "Balanced diet with low glycemic index foods helps reduce diabetes risk.",
+            "reduce": "To reduce diabetes risk: maintain a healthy weight, eat balanced meals, exercise regularly, and monitor glucose levels."
         }
 
         query = user_input.lower()
