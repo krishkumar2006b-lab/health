@@ -214,17 +214,33 @@ with tab_ml:
     ).properties(width=700, height=400, title="Risk Categories vs Probability")
     st.altair_chart(chart, use_container_width=True)
 
-    # Clinical Notes
-    st.markdown(""")
-    <h3 style="font-size:22px; color:white; margin-top:20px;">📌 Clinical Notes</h3>
+    # =====================================================
+    # CLINICAL NOTES
+    # =====================================================
+    st.markdown("""
+    <h3 style="
+        font-size:22px;
+        color:white;
+        margin-top:25px;
+        margin-bottom:12px;
+    ">
+        📌 Clinical Notes
+    </h3>
+
     <div style="
         background:linear-gradient(135deg,#172A3A,#203A4F);
-        padding:18px 22px;
+        padding:20px 24px;
         border-radius:14px;
-        border-left:5px solid #5DADE2;
-        box-shadow:0 5px 15px rgba(0,0,0,0.18);
+        border-left:6px solid #5DADE2;
+        box-shadow:0 6px 18px rgba(0,0,0,0.25);
     ">
-        <ul style="font-size:16px; color
+        <ul style="
+            font-size:17px;
+            color:white;
+            line-height:1.9;
+            margin:0;
+            padding-left:18px
+
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
 # ---------------------------------------------------------
