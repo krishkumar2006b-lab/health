@@ -38,28 +38,27 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Appealing Dashboard Style)
+# TAB 1: AI PATIENT PREDICTOR (Appealing Input Section)
 # ---------------------------------------------------------
-import altair as alt
-
 with tab_ml:
-    # Title
-    st.markdown("<h1 style='font-size:36px; color:#2C3E50;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size:36px; color:white; background-color:#2C3E50; padding:10px; border-radius:8px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
     st.markdown("""
-    <p style='font-size:18px; color:#34495E;'>
-    This calculator uses the <b>validated Finnish Diabetes Risk Score (FINDRISC)</b> model.  
-    It estimates your <b>10‑year risk</b> of developing type 2 diabetes based on lifestyle and clinical factors.
+    <p style='font-size:18px; color:white; background-color:#34495E; padding:8px; border-radius:6px;'>
+    Estimate your <b>10‑year risk</b> of developing type 2 diabetes using the validated FINDRISC model.  
+    Enter your details below to calculate your personalized score.
     </p>
     """, unsafe_allow_html=True)
 
     st.divider()
 
-    # Input layout
-    st.markdown("<h2 style='font-size:22px; color:#1F618D;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
+    # Stylish input section
+    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:10px; border-radius:8px;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
+
+    # Reordered layout for logical flow
     col1, col2 = st.columns(2)
 
     with col1:
-        age = st.slider("Age (Years)", 18, 90, 45)
+        age = st.slider("Age (Years)", 18, 90, 33)
         bmi = st.number_input("BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
         waist = st.number_input("Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
 
@@ -69,6 +68,7 @@ with tab_ml:
         meds = st.radio("On Antihypertensive Medication?", ["Yes", "No"])
         high_glucose = st.radio("History of High Blood Glucose?", ["Yes", "No"])
         family = st.radio("Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
+
 
     # Scoring logic (FINDRISC)
     score = 0
