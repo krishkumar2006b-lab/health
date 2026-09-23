@@ -41,12 +41,15 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 # ---------------------------------------------------------
 # TAB 1: AI PATIENT PREDICTOR (Appealing Dashboard Style)
 # ---------------------------------------------------------
+import altair as alt
+
 with tab_ml:
-    st.markdown("<h1 style='font-size:34px; color:#2C3E50;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+    # Title
+    st.markdown("<h1 style='font-size:36px; color:#2C3E50;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
     st.markdown("""
     <p style='font-size:18px; color:#34495E;'>
     This calculator uses the <b>validated Finnish Diabetes Risk Score (FINDRISC)</b> model.  
-    It estimates your 10‑year risk of developing type 2 diabetes based on lifestyle and clinical factors.
+    It estimates your <b>10‑year risk</b> of developing type 2 diabetes based on lifestyle and clinical factors.
     </p>
     """, unsafe_allow_html=True)
 
@@ -94,17 +97,37 @@ with tab_ml:
 
     if score < 7:
         st.success("✅ Low Risk — <1% chance of diabetes in 10 years.")
+        risk_level = "Low"
     elif score < 12:
         st.info("ℹ️ Slightly Elevated Risk — ~4% chance.")
+        risk_level = "Slightly Elevated"
     elif score < 15:
         st.warning("⚠️ Moderate Risk — ~17% chance.")
+        risk_level = "Moderate"
     elif score < 20:
         st.error("⚠️ High Risk — ~33% chance. Clinical consultation recommended.")
+        risk_level = "High"
     else:
         st.error("🚨 Very High Risk — >50% chance. Immediate medical evaluation advised.")
+        risk_level = "Very High"
 
     # Visual gauge
+    st.markdown("<h3 style='font-size:22px; color:#1F618D;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
     st.progress(int((score/26)*100))
+
+    # Comparison chart
+    st.markdown("<h3 style='font-size:22px; color:#1F618D;'>📊 Population Risk Comparison</h3>", unsafe_allow_html=True)
+    categories = pd.DataFrame({
+        "Category": ["Low (<7)", "Slightly Elevated (7-11)", "Moderate (12-14)", "High (15-20)", "Very High (>20)"],
+        "Probability (%)": [1, 4, 17, 33, 50]
+    })
+    chart = alt.Chart(categories).mark_bar().encode(
+        x=alt.X("Category:N", title="Risk Category"),
+        y=alt.Y("Probability (%):Q", title="10-Year Diabetes Probability"),
+        color=alt.Color("Category:N", scale=alt.Scale(scheme="reds")),
+        tooltip=["Category", "Probability (%)"]
+    ).properties(width=700, height=400, title="Risk Categories vs Probability")
+    st.altair_chart(chart, use_container_width=True)
 
     # Clinical context
     st.markdown("""
@@ -116,7 +139,6 @@ with tab_ml:
         <li>Risk categories are tied to published probabilities (1%, 4%, 17%, 33%, 50%).</li>
     </ul>
     """, unsafe_allow_html=True)
-
 
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
