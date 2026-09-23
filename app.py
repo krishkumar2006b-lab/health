@@ -153,12 +153,14 @@ with tab_chat:
         st.markdown("<script>window.scrollTo(0, document.body.scrollHeight);</script>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# TAB 3: LIVE WHO GLOBAL DATA (Backend API)
+# TAB 3: LIVE WHO GLOBAL DATA (Backend API, Enhanced)
 # ---------------------------------------------------------
+import altair as alt
+
 with tab_who:
-    st.header("World Health Organization (WHO) API Integration")
-    st.write("Connected to WHO Global Health Observatory OData API (`https://www.who.int/`).")
-    
+    st.header("🌐 WHO Global Diabetes Data Explorer")
+    st.write("Pulling live prevalence statistics from the WHO Global Health Observatory API.")
+
     @st.cache_data(ttl=3600)
     def fetch_who_data():
         url = "https://ghoapi.azureedge.net/api/NCD_GLUC_01"
@@ -167,31 +169,78 @@ with tab_who:
             if res.status_code == 200:
                 data = res.json().get('value', [])
                 records = []
-                for item in data[:15]:
+                for item in data[:50]:  # fetch more records for richer visualization
                     records.append({
-                        "Country Code": item.get('SpatialDim', 'N/A'),
-                        "Year": item.get('TimeDim', 'N/A'),
+                        "Country": item.get('SpatialDim', 'N/A'),
+                        "Year": int(item.get('TimeDim', 0)),
                         "Sex": item.get('Dim1', 'Both'),
-                        "Prevalence Value (%)": item.get('NumericValue', 0.0)
+                        "Prevalence (%)": float(item.get('NumericValue', 0.0))
                     })
                 return pd.DataFrame(records)
         except Exception:
             return None
 
-    with st.spinner("Fetching live statistics from WHO API..."):
+    with st.spinner("📡 Fetching live statistics from WHO API..."):
         df_who = fetch_who_data()
-    
+
     if df_who is not None and not df_who.empty:
-        st.success("Successfully fetched live records from WHO GHO API Endpoint!")
-        st.dataframe(df_who, use_container_width=True)
+        st.success("✅ Live WHO data successfully retrieved!")
+
+        # Show raw data
+        st.markdown("### 📊 Raw Data Snapshot")
+        st.dataframe(df_who.head(20), use_container_width=True)
+
+        # Interactive chart: prevalence by country/year
+        st.markdown("### 📈 Prevalence Trends by Country")
+        chart = alt.Chart(df_who).mark_line(point=True).encode(
+            x=alt.X('Year:O', title='Year'),
+            y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
+            color='Country:N',
+            tooltip=['Country', 'Year', 'Prevalence (%)', 'Sex']
+        ).properties(
+            width=700,
+            height=400,
+            title="Diabetes Prevalence Trends"
+        )
+        st.altair_chart(chart, use_container_width=True)
+
+        # Bar chart by sex
+        st.markdown("### 🧍 Prevalence by Sex")
+        sex_chart = alt.Chart(df_who).mark_bar().encode(
+            x=alt.X('Sex:N', title='Sex'),
+            y=alt.Y('Prevalence (%):Q', aggregate='mean'),
+            color='Sex:N',
+            tooltip=['Sex', 'Prevalence (%)']
+        ).properties(
+            width=400,
+            height=300
+        )
+        st.altair_chart(sex_chart, use_container_width=True)
+
     else:
-        st.warning("WHO API endpoint busy. Showing cached reference data:")
+        st.warning("⚠️ WHO API endpoint busy. Showing cached reference data instead.")
+
         sample_who = pd.DataFrame({
-            "Country Code": ["IND", "USA", "DEU", "GBR", "BRA"],
+            "Country": ["India", "USA", "Germany", "UK", "Brazil"],
             "Region": ["South-East Asia", "Americas", "Europe", "Europe", "Americas"],
             "Glucose Prevalence Rate (%)": [10.4, 10.8, 7.7, 6.8, 8.8]
         })
-        st.table(sample_who)
+
+        st.markdown("### 📊 Cached Reference Data")
+        st.dataframe(sample_who, use_container_width=True)
+
+        # Visualize cached data
+        chart = alt.Chart(sample_who).mark_bar().encode(
+            x='Country',
+            y='Glucose Prevalence Rate (%)',
+            color='Region',
+            tooltip=['Country', 'Region', 'Glucose Prevalence Rate (%)']
+        ).properties(
+            width=600,
+            height=400,
+            title="Cached Prevalence Rates"
+        )
+        st.altair_chart(chart, use_container_width=True)
 
 # ---------------------------------------------------------
 # TAB 4: DALY COST ANALYSIS
