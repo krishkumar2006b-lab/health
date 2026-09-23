@@ -206,19 +206,48 @@ with tab_daly:
 # ---------------------------------------------------------
 # TAB 5: ML OVERVIEW & FEATURE IMPORTANCE
 # ---------------------------------------------------------
+import plotly.express as px
+
 with tab_overview:
-    st.header("Model Feature Importance & Weightings")
-    
+    st.header("🧠 Model Feature Importance & Weightings")
+
     st.markdown("""
-    ### Feature Construction & Transformation Breakdown
-    1. **Log(Glucose):** High magnitude driver ($\approx 48\%$ Gini importance). Transforming glucose via logarithmic scaling ($\ln(\text{Glucose} + 1)$) handles extreme right-skewness in raw blood sugar measurements.
-    2. **BMI ($W / H^2$):** Composite body mass index carries $\approx 32\%$ weight in predicting metabolic disease risk.
-    3. **Age:** Biological age contributes $\approx 20\%$ to progressive insulin resistance probability.
+    ### 🔍 Why These Features Matter
+    - **Log(Glucose):** 🚀 Strongest driver (~48%). Log transformation reduces skewness in glucose readings, making predictions more stable.
+    - **BMI (W / H²):** ⚖️ Contributes ~32%. Higher BMI correlates with insulin resistance and metabolic risk.
+    - **Age:** ⏳ Adds ~20%. Older age increases probability of progressive insulin resistance.
     """)
-    
+
+    # DataFrame of importance
     importance_df = pd.DataFrame({
         'Feature': ['Log(Glucose)', 'Constructed BMI', 'Age'],
         'Importance Weight (%)': [48, 32, 20]
-    }).set_index('Feature')
-    
-    st.bar_chart(importance_df)
+    })
+
+    # Interactive horizontal bar chart
+    fig = px.bar(
+        importance_df,
+        x='Importance Weight (%)',
+        y='Feature',
+        orientation='h',
+        color='Importance Weight (%)',
+        color_continuous_scale='Blues',
+        text='Importance Weight (%)',
+        title="Feature Importance Breakdown"
+    )
+    fig.update_layout(
+        xaxis_title="Weight (%)",
+        yaxis_title="Feature",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=14),
+        title=dict(x=0.5)
+    )
+    fig.update_traces(textposition='outside')
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Add a summary table
+    st.markdown("### 📊 Importance Table")
+    st.dataframe(importance_df.set_index("Feature"), use_container_width=True)
+
