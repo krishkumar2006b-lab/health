@@ -206,6 +206,9 @@ with tab_daly:
 # ---------------------------------------------------------
 # TAB 5: ML OVERVIEW & FEATURE IMPORTANCE
 # ---------------------------------------------------------
+# ---------------------------------------------------------
+# TAB 5: ML OVERVIEW & FEATURE IMPORTANCE
+# ---------------------------------------------------------
 import altair as alt
 
 with tab_overview:
@@ -213,26 +216,53 @@ with tab_overview:
 
     st.markdown("""
     ### 🔍 Why These Features Matter
-    - **Log(Glucose):** 🚀 Strongest driver (~48%). Log transformation reduces skewness in glucose readings.
-    - **BMI (W / H²):** ⚖️ Contributes ~32%. Higher BMI correlates with insulin resistance.
+    - **Log(Glucose):** 🚀 Strongest driver (~48%). Log transformation reduces skewness in glucose readings, making predictions more stable.
+    - **BMI (W / H²):** ⚖️ Contributes ~32%. Higher BMI correlates with insulin resistance and metabolic risk.
     - **Age:** ⏳ Adds ~20%. Older age increases probability of progressive insulin resistance.
     """)
 
+    # DataFrame of importance
     importance_df = pd.DataFrame({
         'Feature': ['Log(Glucose)', 'Constructed BMI', 'Age'],
         'Importance Weight (%)': [48, 32, 20]
     })
 
-    chart = alt.Chart(importance_df).mark_bar().encode(
+    # Interactive horizontal bar chart
+    bar_chart = alt.Chart(importance_df).mark_bar().encode(
         x=alt.X('Importance Weight (%)', title='Weight (%)'),
         y=alt.Y('Feature', sort='-x'),
-        color='Importance Weight (%)',
+        color=alt.Color('Importance Weight (%)', scale=alt.Scale(scheme='blues')),
         tooltip=['Feature', 'Importance Weight (%)']
     ).properties(
-        title="Feature Importance Breakdown"
+        title="Feature Importance Breakdown",
+        width=600,
+        height=300
     )
 
-    st.altair_chart(chart, use_container_width=True)
+    # Add labels on bars
+    text = bar_chart.mark_text(
+        align='left',
+        baseline='middle',
+        dx=3
+    ).encode(
+        text='Importance Weight (%)'
+    )
 
+    st.altair_chart(bar_chart + text, use_container_width=True)
+
+    # Pie chart for proportional view
+    pie_chart = alt.Chart(importance_df).mark_arc(innerRadius=50).encode(
+        theta=alt.Theta(field="Importance Weight (%)", type="quantitative"),
+        color=alt.Color(field="Feature", type="nominal", scale=alt.Scale(scheme='category20')),
+        tooltip=['Feature', 'Importance Weight (%)']
+    ).properties(
+        title="Proportional Contribution of Features",
+        width=400,
+        height=400
+    )
+
+    st.altair_chart(pie_chart, use_container_width=True)
+
+    # Add a summary table
     st.markdown("### 📊 Importance Table")
     st.dataframe(importance_df.set_index("Feature"), use_container_width=True)
