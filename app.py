@@ -38,17 +38,17 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Balanced Risk Detection)
+# TAB 1: AI PATIENT PREDICTOR (Polished Dashboard)
 # ---------------------------------------------------------
 import altair as alt
 
 with tab_ml:
-    st.markdown("<h1 style='font-size:32px;'>🩺 Patient Clinical Risk Calculator</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size:32px;'>🩺 AI Patient Clinical Risk Calculator</h1>", unsafe_allow_html=True)
     st.markdown("""
     <p style='font-size:18px;'>
-    Calculates diabetes likelihood using feature-engineered transformations:  
-    <b>BMI = W / H²</b> and <b>Log(Glucose + 1)</b>.  
-    The model applies a logistic regression formula to estimate risk probability.
+    Estimate diabetes likelihood using age, BMI, and plasma glucose.  
+    Features include <b>BMI = W / H²</b> and <b>Log(Glucose + 1)</b>.  
+    The model applies a logistic regression formula to calculate risk probability.
     </p>
     """, unsafe_allow_html=True)
 
@@ -69,26 +69,29 @@ with tab_ml:
     log_glucose = np.log1p(glucose)
 
     # Balanced logistic regression formula
-    # Smaller coefficients + adjusted intercept for realistic spread
-    z = -3.5 + (0.02 * age) + (0.05 * bmi) + (0.4 * log_glucose)
+    z = -4.0 + (0.02 * age) + (0.06 * bmi) + (0.35 * log_glucose)
     probability = 1 / (1 + np.exp(-z))
     risk_pct = round(probability * 100, 1)
 
     st.divider()
 
-    # Metrics
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Calculated BMI", f"{bmi:.1f} kg/m²")
-    m2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
-    m3.metric("Diabetes Risk Score", f"{risk_pct}%")
+    # Results layout
+    res1, res2, res3 = st.columns(3)
+    res1.metric("Calculated BMI", f"{bmi:.1f} kg/m²")
+    res2.metric("Log(Glucose + 1)", f"{log_glucose:.2f}")
+    res3.metric("Diabetes Risk Score", f"{risk_pct}%")
 
-    # Risk interpretation with balanced thresholds
+    # Risk interpretation with styled cards
     if risk_pct >= 70:
-        st.error("⚠️ Status: High Risk — Immediate Clinical Consultation Recommended.")
+        st.error("⚠️ High Risk — Immediate Clinical Consultation Recommended.")
     elif risk_pct >= 40:
-        st.warning("⚠️ Status: Moderate Risk — Monitor regularly and adopt preventive measures.")
+        st.warning("⚠️ Moderate Risk — Monitor regularly and adopt preventive measures.")
     else:
-        st.success("✅ Status: Low Risk — Maintain healthy lifestyle.")
+        st.success("✅ Low Risk — Maintain healthy lifestyle.")
+
+    # Visual gauge (progress bar style)
+    st.markdown("<h3 style='font-size:22px;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
+    st.progress(int(risk_pct))
 
     # Clinical context
     st.markdown("""
