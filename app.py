@@ -38,41 +38,192 @@ tab_ml, tab_chat, tab_who, tab_daly, tab_overview = st.tabs([
 ])
 
 # ---------------------------------------------------------
-# TAB 1: AI PATIENT PREDICTOR (Premium Input Form)
+# TAB 1: AI PATIENT PREDICTOR (Premium Dashboard Style)
 # ---------------------------------------------------------
+import altair as alt
+import pandas as pd
+import streamlit as st
+
 with tab_ml:
-    # Title
-    st.markdown("<h1 style='font-size:36px; color:white; background-color:#2C3E50; padding:12px; border-radius:8px;'>🩺 Diabetes Risk Calculator (FINDRISC)</h1>", unsafe_allow_html=True)
+
+    # =====================================================
+    # PAGE TITLE
+    # =====================================================
     st.markdown("""
-    <p style='font-size:18px; color:white; background-color:#34495E; padding:10px; border-radius:6px;'>
-    Enter your personal and lifestyle details below.  
-    The calculator uses the <b>validated FINDRISC model</b> to estimate your 10‑year diabetes risk.
-    </p>
+    <h1 style="
+        font-size:36px;
+        color:white;
+        background:linear-gradient(135deg,#1F618D,#2C3E50);
+        padding:16px 20px;
+        border-radius:12px;
+        margin-bottom:10px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.25);
+    ">
+        🩺 Diabetes Risk Calculator
+        <span style="font-size:22px; color:#85C1E9;">
+            (FINDRISC)
+        </span>
+    </h1>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="
+        font-size:17px;
+        color:white;
+        background:linear-gradient(135deg,#34495E,#2C3E50);
+        padding:15px 18px;
+        border-radius:10px;
+        margin-bottom:18px;
+        line-height:1.6;
+        border-left:5px solid #5DADE2;
+    ">
+        This calculator uses the <b>validated Finnish Diabetes Risk Score (FINDRISC)</b> model.<br>
+        It estimates your <b>10-year risk</b> of developing type 2 diabetes based on lifestyle and clinical factors.
+    </div>
     """, unsafe_allow_html=True)
 
     st.divider()
 
-    # Input section styled like a card
-    st.markdown("<h2 style='font-size:24px; color:white; background-color:#1F618D; padding:12px; border-radius:8px;'>📋 Enter Your Details</h2>", unsafe_allow_html=True)
+    # =====================================================
+    # ENTER YOUR DETAILS HEADER
+    # =====================================================
+    st.markdown("""
+    <div style="
+        background: linear-gradient(145deg,#172A3A,#203A4F);
+        border-radius:18px;
+        padding:22px 24px;
+        margin:8px 0 18px 0;
+        box-shadow:0 8px 25px rgba(0,0,0,0.20);
+    ">
+        <div style="color:#FFFFFF; font-size:21px; font-weight:700; margin-bottom:5px;">
+            📋 Enter Your Details
+        </div>
+        <div style="color:#AFC4D4; font-size:14px; margin-bottom:10px;">
+            Provide your basic measurements, lifestyle information, and medical history to calculate your FINDRISC score.
+        </div>
+        <span style="
+            display:inline-block;
+            background:rgba(52,152,219,0.16);
+            color:#5DADE2;
+            padding:5px 10px;
+            border-radius:20px;
+            font-size:11px;
+            font-weight:600;
+        ">
+            🔒 Your information is used only for this calculation
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Two-column layout
-    col1, col2 = st.columns(2)
+    # =====================================================
+    # TWO COLUMN INPUT SECTION
+    # =====================================================
+    col1, col2 = st.columns(2, gap="large")
 
-    # Left column: demographics
+    # LEFT COLUMN — BASIC MEASUREMENTS
     with col1:
         age = st.slider("🧍 Age (Years)", 18, 90, 33)
-        bmi = st.number_input("⚖️ BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0)
-        waist = st.number_input("📏 Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0)
+        bmi = st.number_input("⚖️ BMI (kg/m²)", min_value=15.0, max_value=50.0, value=24.0, step=0.1)
+        waist = st.number_input("📏 Waist Circumference (cm)", min_value=50.0, max_value=150.0, value=90.0, step=0.5)
 
-    # Right column: lifestyle & medical
+    # RIGHT COLUMN — LIFESTYLE & MEDICAL HISTORY
     with col2:
-        activity = st.radio("🏃 Daily Physical Activity ≥30 min?", ["Yes", "No"])
-        diet = st.radio("🍎 Daily Fruit/Vegetable Intake?", ["Yes", "No"])
-        meds = st.radio("💊 On Antihypertensive Medication?", ["Yes", "No"])
-        high_glucose = st.radio("🩸 History of High Blood Glucose?", ["Yes", "No"])
-        family = st.radio("👨‍👩‍👧 Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"])
+        activity = st.radio("🏃 Daily Physical Activity ≥30 min?", ["Yes", "No"], horizontal=True)
+        diet = st.radio("🍎 Daily Fruit/Vegetable Intake?", ["Yes", "No"], horizontal=True)
+        meds = st.radio("💊 On Antihypertensive Medication?", ["Yes", "No"], horizontal=True)
+        high_glucose = st.radio("🩸 History of High Blood Glucose?", ["Yes", "No"], horizontal=True)
 
+    # FAMILY HISTORY — FULL WIDTH
+    family = st.radio("👨‍👩‍👧 Family History of Diabetes?", ["No", "Yes (grandparent/uncle/aunt)", "Yes (parent/sibling/child)"], horizontal=True)
 
+    st.divider()
+
+    # =====================================================
+    # FINDRISC SCORING
+    # =====================================================
+    score = 0
+    if age >= 45 and age < 55: score += 2
+    elif age >= 55 and age < 65: score += 3
+    elif age >= 65: score += 4
+
+    if bmi >= 25 and bmi < 30: score += 1
+    elif bmi >= 30: score += 3
+
+    if waist >= 94 and waist < 102: score += 3
+    elif waist >= 102: score += 4
+
+    if activity == "No": score += 2
+    if diet == "No": score += 1
+    if meds == "Yes": score += 2
+    if high_glucose == "Yes": score += 5
+    if family == "Yes (grandparent/uncle/aunt)": score += 3
+    elif family == "Yes (parent/sibling/child)": score += 5
+
+    # =====================================================
+    # RESULTS SECTION
+    # =====================================================
+    st.markdown("""
+    <h2 style="
+        font-size:24px;
+        color:white;
+        background:linear-gradient(135deg,#1F618D,#2874A6);
+        padding:13px 16px;
+        border-radius:10px;
+        box-shadow:0 5px 15px rgba(0,0,0,0.20);
+    ">
+        📊 Your Risk Results
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.metric("FINDRISC Score", f"{score} / 26")
+
+    if score < 7:
+        st.success("✅ Low Risk — <1% chance of diabetes in 10 years.")
+        risk_level = "Low"
+    elif score < 12:
+        st.info("ℹ️ Slightly Elevated Risk — ~4% chance.")
+        risk_level = "Slightly Elevated"
+    elif score < 15:
+        st.warning("⚠️ Moderate Risk — ~17% chance.")
+        risk_level = "Moderate"
+    elif score < 20:
+        st.error("⚠️ High Risk — ~33% chance. Clinical consultation recommended.")
+        risk_level = "High"
+    else:
+        st.error("🚨 Very High Risk — >50% chance. Immediate medical evaluation advised.")
+        risk_level = "Very High"
+
+    # Risk Gauge
+    st.markdown("<h3 style='font-size:22px; color:white;'>📊 Risk Gauge</h3>", unsafe_allow_html=True)
+    st.progress(int((score / 26) * 100))
+
+    # Population Risk Comparison Chart
+    categories = pd.DataFrame({
+        "Category": ["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"],
+        "Probability (%)": [50, 33, 17, 4, 1]
+    })
+    chart = alt.Chart(categories).mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
+        x=alt.X("Category:N", sort=["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"], title="Risk Category",
+                axis=alt.Axis(labelAngle=-20, labelColor="white", titleColor="white")),
+        y=alt.Y("Probability (%):Q", title="10-Year Diabetes Probability",
+                axis=alt.Axis(labelColor="white", titleColor="white")),
+        color=alt.Color("Category:N", scale=alt.Scale(domain=["Very High (>20)", "High (15-20)", "Moderate (12-14)", "Slightly Elevated (7-11)", "Low (<7)"],
+                                                     range=["darkred", "red", "orange", "gold", "green"])),
+        tooltip=["Category", "Probability (%)"]
+    ).properties(width=700, height=400, title="Risk Categories vs Probability")
+    st.altair_chart(chart, use_container_width=True)
+
+    # Clinical Notes
+    st.markdown("""
+    <h3 style="font-size:22px; color:white; margin-top:20px;">📌 Clinical Notes</h3>
+    <div style="
+        background:linear-gradient(135deg,#172A3A,#203A4F);
+        padding:18px 22px;
+        border-radius:14px;
+        border-left:5px solid #5DADE2;
+        box-shadow:0 5px 15px rgba(0,0,0,0.18);
+    ">
+        <ul style="font-size:16px; color
 # ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT 
 # ---------------------------------------------------------
