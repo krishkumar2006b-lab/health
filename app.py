@@ -77,9 +77,6 @@ with tab_ml:
 
 
 # ---------------------------------------------------------
-# TAB 2: AI CLINICAL CHATBOT
-# ---------------------------------------------------------
-# ---------------------------------------------------------
 # TAB 2: AI CLINICAL CHATBOT (Smarter Rules)
 # ---------------------------------------------------------
 with tab_chat:
@@ -88,7 +85,7 @@ with tab_chat:
 
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            {"role": "assistant", "content": "Hello! I am your AI Health Assistant. Ask me about BMI, glucose, exercise, diet, or general diabetes management."}
+            {"role": "assistant", "content": "Hello 👋! I am your AI Health Assistant. You can ask me about BMI, glucose, exercise, diet, or general diabetes management."}
         ]
 
     # Display chat history
@@ -102,8 +99,12 @@ with tab_chat:
         with st.chat_message("user"):
             st.write(user_input)
 
-        # Smarter keyword-based responses
+        # Keyword-based responses
         responses = {
+            "hello": "Hi there 👋! How can I help you today?",
+            "hi": "Hello 👋! Ask me about BMI, glucose, exercise, or diet.",
+            "thanks": "You’re welcome! Stay healthy and keep monitoring your risk factors.",
+            "bye": "Goodbye 👋 — remember, consistent lifestyle habits are key to prevention.",
             "bmi": "BMI evaluates weight relative to height (kg/m²). Normal range is 18.5–24.9. Higher BMIs increase insulin resistance risk.",
             "glucose": "Fasting plasma glucose <100 mg/dL is normal. 100–125 mg/dL = prediabetes. ≥126 mg/dL = diabetes.",
             "sugar": "Blood sugar levels above 126 mg/dL on multiple tests indicate diabetes.",
