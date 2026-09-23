@@ -236,8 +236,8 @@ with tab_who:
             y=alt.Y('Prevalence (%):Q', title='Glucose Prevalence (%)'),
             color=alt.Color('Sex:N',
                             title="Sex",
-                            scale=alt.Scale(domain=["Male", "Female", "Both"],
-                                            range=["blue", "red", "gray"])),
+                            scale=alt.Scale(domain=["Male", "Female"],
+                                            range=["blue", "red"])),
             tooltip=['Year', 'Sex', 'Prevalence (%)']
         ).properties(
             width=700,
